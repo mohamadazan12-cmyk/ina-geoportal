@@ -1,0 +1,124 @@
+{
+  "type": "FeatureCollection",
+  "name": "Batas_Administrasi_Kabupaten_Kota",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "KAB_KOTA": "Kota Administrasi Jakarta Pusat",
+        "PROVINSI": "DKI Jakarta",
+        "KODE_DAGRI": "31.71",
+        "LUAS_KM2": 48.13,
+        "SUMBER": "Badan Informasi Geospasial (BIG)",
+        "WALI_DATA": "Pusat Pemetaan Batas Wilayah BIG"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [106.81, -6.16],
+            [106.87, -6.16],
+            [106.88, -6.21],
+            [106.83, -6.22],
+            [106.80, -6.19],
+            [106.81, -6.16]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "KAB_KOTA": "Kota Bandung",
+        "PROVINSI": "Jawa Barat",
+        "KODE_DAGRI": "32.73",
+        "LUAS_KM2": 167.31,
+        "SUMBER": "Badan Informasi Geospasial (BIG)",
+        "WALI_DATA": "Pusat Pemetaan Batas Wilayah BIG"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [107.56, -6.88],
+            [107.68, -6.88],
+            [107.72, -6.95],
+            [107.61, -6.97],
+            [107.54, -6.93],
+            [107.56, -6.88]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "KAB_KOTA": "Kota Surabaya",
+        "PROVINSI": "Jawa Timur",
+        "KODE_DAGRI": "35.78",
+        "LUAS_KM2": 326.81,
+        "SUMBER": "Badan Informasi Geospasial (BIG)",
+        "WALI_DATA": "Pusat Pemetaan Batas Wilayah BIG"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [106.63, -7.21],
+            [106.82, -7.21],
+            [106.85, -7.33],
+            [106.66, -7.34],
+            [106.63, -7.21]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "KAB_KOTA": "Kota Denpasar",
+        "PROVINSI": "Bali",
+        "KODE_DAGRI": "51.71",
+        "LUAS_KM2": 127.78,
+        "SUMBER": "Badan Informasi Geospasial (BIG)",
+        "WALI_DATA": "Pusat Pemetaan Batas Wilayah BIG"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [115.18, -8.62],
+            [115.28, -8.62],
+            [115.27, -8.72],
+            [115.19, -8.70],
+            [115.18, -8.62]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "KAB_KOTA": "Kota Makassar",
+        "PROVINSI": "Sulawesi Selatan",
+        "KODE_DAGRI": "73.71",
+        "LUAS_KM2": 175.77,
+        "SUMBER": "Badan Informasi Geospasial (BIG)",
+        "WALI_DATA": "Pusat Pemetaan Batas Wilayah BIG"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [119.38, -5.10],
+            [119.52, -5.10],
+            [119.53, -5.20],
+            [119.40, -5.20],
+            [119.38, -5.10]
+          ]
+        ]
+      }
+    }
+  ]
+}

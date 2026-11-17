@@ -1,0 +1,109 @@
+{
+  "type": "FeatureCollection",
+  "name": "Sebaran_Fasilitas_Kesehatan_Indonesia",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "NAMA_FASKES": "RSUP Nasional Dr. Cipto Mangunkusumo",
+        "JENIS": "Rumah Sakit Umum Pusat (RSUP)",
+        "KELAS": "Kelas A",
+        "KAPASITAS_TEMPAT_TIDUR": 1005,
+        "LAYANAN_DARURAT": "24 Jam Trauma Center",
+        "ALAMAT": "Jl. Diponegoro No. 71, Jakarta Pusat",
+        "KOTA": "Jakarta Pusat",
+        "WALI_DATA": "Kementerian Kesehatan RI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.8456, -6.1972]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "NAMA_FASKES": "RSUP Dr. Hasan Sadikin",
+        "JENIS": "Rumah Sakit Umum Pusat (RSUP)",
+        "KELAS": "Kelas A",
+        "KAPASITAS_TEMPAT_TIDUR": 950,
+        "LAYANAN_DARURAT": "24 Jam",
+        "ALAMAT": "Jl. Pasteur No. 38, Bandung",
+        "KOTA": "Bandung",
+        "WALI_DATA": "Kementerian Kesehatan RI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [107.5986, -6.8967]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "NAMA_FASKES": "RSUP Dr. Sardjito",
+        "JENIS": "Rumah Sakit Umum Pusat (RSUP)",
+        "KELAS": "Kelas A",
+        "KAPASITAS_TEMPAT_TIDUR": 850,
+        "LAYANAN_DARURAT": "24 Jam",
+        "ALAMAT": "Jl. Kesehatan No. 1 Sekip, Yogyakarta",
+        "KOTA": "Sleman / D.I. Yogyakarta",
+        "WALI_DATA": "Kementerian Kesehatan RI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [110.3736, -7.7686]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "NAMA_FASKES": "RSUP Prof. Dr. I.G.N.G. Ngoerah (Sanglah)",
+        "JENIS": "Rumah Sakit Umum Pusat (RSUP)",
+        "KELAS": "Kelas A",
+        "KAPASITAS_TEMPAT_TIDUR": 720,
+        "LAYANAN_DARURAT": "24 Jam",
+        "ALAMAT": "Jl. Diponegoro, Denpasar Barat",
+        "KOTA": "Denpasar",
+        "WALI_DATA": "Kementerian Kesehatan RI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [115.2128, -8.6749]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "NAMA_FASKES": "RSUP Dr. Wahidin Sudirohusodo",
+        "JENIS": "Rumah Sakit Umum Pusat (RSUP)",
+        "KELAS": "Kelas A",
+        "KAPASITAS_TEMPAT_TIDUR": 810,
+        "LAYANAN_DARURAT": "24 Jam",
+        "ALAMAT": "Jl. Perintis Kemerdekaan KM. 11, Tamalanrea",
+        "KOTA": "Makassar",
+        "WALI_DATA": "Kementerian Kesehatan RI"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [119.4975, -5.1326]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "NAMA_FASKES": "RSUD Jayapura",
+        "JENIS": "Rumah Sakit Umum Daerah Rujukan",
+        "KELAS": "Kelas B Pendidikan",
+        "KAPASITAS_TEMPAT_TIDUR": 350,
+        "LAYANAN_DARURAT": "24 Jam",
+        "ALAMAT": "Jl. Kesehatan No. 1, Dok II, Jayapura",
+        "KOTA": "Kota Jayapura",
+        "WALI_DATA": "Dinas Kesehatan Prov. Papua"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [140.7188, -2.5367]
+      }
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+datasource db {
+  // Provider is read from the datasource at migrate time.
+  // - Development: SQLite (file:./dev.db)
+  // - Production:  PostgreSQL (Neon)
+  // Switch via the `prisma/schema.postgres.prisma` variant and
+  // `prisma migrate deploy` against DATABASE_URL. See docs/POSTGRES_MIGRATION.md.
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  // Required when deploying to Vercel (Amazon Linux 2023 runtime).
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  password        String?
+  name            String
+  institution     String?
+  role            String            @default("USER")
+  avatarUrl       String?
+  googleId        String?           @unique
+  provider        String            @default("local") // "local" | "google"
+  emailVerified   Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  bookmarks       Bookmark[]
+  downloadHistory DownloadHistory[]
+}
+
+model Category {
+  id          String    @id
+  name        String
+  description String?
+  icon        String?
+  datasets    Dataset[]
+  createdAt   DateTime  @default(now())
+}
+
+model NetworkNode {
+  id           String    @id
+  name         String
+  type         String    // "kl" | "provinsi" | "kabkot"
+  province     String?
+  regency      String?
+  description  String?
+  status       String    @default("online") // "online" | "synced" | "offline" | "unknown"
+  websiteUrl   String?
+  contactEmail String?
+  contactPhone String?
+  lastSyncAt   DateTime?
+  datasets     Dataset[]
+  createdAt    DateTime  @default(now())
+}
+
+model Dataset {
+  id              String            @id
+  title           String
+  abstract        String
+  description     String
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id])
+  nodeId          String
+  node            NetworkNode       @relation(fields: [nodeId], references: [id])
+  year            Int
+  publishedDate   String
+  updatedDate     String
+  crs             String            @default("WGS 84 / Geographic (EPSG:4326)")
+  epsg            String            @default("EPSG:4326")
+  scale           String            @default("1:50.000")
+  bbox            String            @default("[95.0, -11.0, 141.0, 6.0]") // [minX, minY, maxX, maxY]
+  accessType      String            @default("public") // "public" | "restricted"
+  formatList      String            @default("geojson,shp,kml,wms") // comma separated
+  wmsUrl          String?
+  wmsLayer        String?
+  wfsUrl          String?
+  wfsLayer        String?
+  downloadUrl     String?
+  geojsonUrl      String?
+  contactPerson   String?
+  distribution    String?
+  isDemo          Boolean           @default(true)
+  downloadCount   Int               @default(0)
+  // Phase 10: Data Provenance & Real Data Management
+  dataSourceStatus    String?       @default("DEMO") // "REAL" | "DEMO" | "FALLBACK" | "PENDING_AUTHORIZATION" | "UNAVAILABLE"
+  verificationStatus  String?       @default("UNVERIFIED") // "VERIFIED" | "CONNECTED" | "PARTIAL" | "PENDING_AUTHORIZATION" | "UNAVAILABLE" | "UNVERIFIED"
+  sourceAgency        String?
+  sourceOrganization  String?
+  sourceDatasetTitle  String?
+  sourceUrl           String?
+  serviceUrl          String?
+  serviceType         String?       // "ArcGIS REST" | "OGC WMS" | "OGC WFS" | "REST API"
+  geometryType        String?       // "Polygon" | "LineString" | "Point" | "Raster"
+  disclaimer          String?
+  attribution         String?
+  metadataUrl         String?
+  license             String?       @default("Pemerintah Republik Indonesia / Data Terbuka")
+  realFeatureCount    Int?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  bookmarks       Bookmark[]
+  downloadHistory DownloadHistory[]
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  datasetId String
+  dataset   Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, datasetId])
+}
+
+model DownloadHistory {
+  id           String   @id @default(uuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  datasetId    String
+  dataset      Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  format       String
+  purpose      String
+  status       String   @default("COMPLETED") // "COMPLETED" | "APPROVED" | "PENDING"
+  downloadedAt DateTime @default(now())
+}
