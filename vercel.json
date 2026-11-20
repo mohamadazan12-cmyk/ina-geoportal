@@ -8,7 +8,7 @@
     "server": {
       "root": "server",
       "framework": "express",
-      "installCommand": "npm install",
+      "installCommand": "npm install --include=dev",
       "buildCommand": "npm run build",
       "functions": {
         "**": {
