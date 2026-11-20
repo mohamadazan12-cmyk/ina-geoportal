@@ -83,12 +83,11 @@ export const DatasetDetailPage: React.FC = () => {
       navigate('/login');
       return;
     }
-    if (!dataset) return;
     try {
-      const res = await userService.toggleBookmark(dataset.id);
+      const res = await userService.toggleBookmark(datasetId!);
       setIsBookmarked(res.bookmarked);
     } catch (err) {
-      console.error(err);
+      console.error('Bookmark toggle error:', err);
     }
   };
 
@@ -101,7 +100,7 @@ export const DatasetDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="py-24">
-        <LoadingSpinner label="Memuat metadata geospasial ISO 19115..." />
+        <LoadingSpinner label="Memuat detail metadata dataset..." />
       </div>
     );
   }
@@ -110,10 +109,10 @@ export const DatasetDetailPage: React.FC = () => {
     return (
       <div className="py-16 max-w-xl mx-auto text-center space-y-4 px-4">
         <h2 className="text-xl font-bold text-slate-800">Dataset Tidak Ditemukan</h2>
-        <p className="text-xs text-slate-500">{(error as Error)?.message || 'Dataset dengan ID tersebut tidak tersedia.'}</p>
+        <p className="text-xs text-slate-500">{(error as Error)?.message || 'Data tidak tersedia.'}</p>
         <Link
           to="/katalog"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1A3BAF] text-white text-xs font-bold rounded-xl shadow"
         >
           <ArrowLeft className="w-4 h-4" />
           Kembali ke Katalog
@@ -126,7 +125,7 @@ export const DatasetDetailPage: React.FC = () => {
   const formats = dataset.formatList.split(',').map((f: string) => f.trim().toUpperCase());
 
   return (
-    <div className="w-full flex flex-col px-5 pt-4 pb-8 select-none space-y-4">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 select-none space-y-6">
       {/* Back link */}
       <div>
         <Link
@@ -138,21 +137,26 @@ export const DatasetDetailPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Hero Header */}
-      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 flex-wrap">
+      {/* Hero Header Card */}
+      <div className="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge variant={isRestricted ? 'restricted' : 'public'}>
               {dataset.accessType.toUpperCase()}
             </Badge>
-            {dataset.dataSourceStatus === 'REAL' ? (
+            {dataset.r2PublicUrl && (
+              <Badge variant="r2">CLOUDFLARE R2</Badge>
+            )}
+            {dataset.dataSourceStatus === 'REAL' || dataset.dataSourceStatus === 'REAL_VERIFIED' ? (
               <Badge variant="real">DATA RESMI TERVERIFIKASI</Badge>
+            ) : dataset.dataSourceStatus === 'REAL_PARTIAL_COVERAGE' ? (
+              <Badge variant="partial">CAKUPAN PARSIAL</Badge>
             ) : dataset.dataSourceStatus === 'PENDING_AUTHORIZATION' ? (
               <Badge variant="pending">MEMERLUKAN IZIN PUSDATIN</Badge>
             ) : dataset.isDemo ? (
               <Badge variant="demo">DEMO / FALLBACK</Badge>
             ) : null}
-            <span className="text-[10px] font-bold text-[#1A3BAF] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+            <span className="text-xs font-bold text-[#1A3BAF] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
               {dataset.category?.name || 'Tematik'}
             </span>
           </div>
@@ -160,31 +164,31 @@ export const DatasetDetailPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleToggleBookmark}
-              className={`p-1.5 rounded-lg border transition-colors flex items-center gap-1 text-xs font-semibold ${
+              className={`px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 text-xs font-semibold ${
                 isBookmarked
                   ? 'bg-amber-50 text-amber-700 border-amber-300'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-amber-500' : ''}`} />
+              <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
               <span>{isBookmarked ? 'Tersimpan' : 'Bookmark'}</span>
             </button>
           </div>
         </div>
 
-        <h1 className="text-xl font-bold text-[#1E1E1E] tracking-tight leading-snug">
+        <h1 className="text-xl md:text-3xl font-bold text-[#1E1E1E] tracking-tight leading-snug">
           {dataset.title}
         </h1>
 
-        <p className="text-xs text-[#717171] leading-relaxed">
+        <p className="text-xs md:text-sm text-[#717171] leading-relaxed max-w-4xl">
           {dataset.abstract}
         </p>
 
         {/* Action Buttons Row */}
-        <div className="flex flex-col gap-2 pt-3 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-slate-100">
           <button
             onClick={() => navigate(`/webmap?addLayer=${encodeURIComponent(dataset.id)}`)}
-            className="w-full h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98"
+            className="w-full sm:w-auto px-6 h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98"
           >
             <Map className="w-4 h-4" />
             <span>Lihat di Peta Webmap</span>
@@ -192,33 +196,45 @@ export const DatasetDetailPage: React.FC = () => {
 
           <button
             onClick={() => setDownloadModalOpen(true)}
-            className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98"
+            className="w-full sm:w-auto px-6 h-11 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98"
           >
             <Download className="w-4 h-4" />
             <span>Unduh Dataset ({formats.join(', ')})</span>
           </button>
+
+          {!isRestricted && (dataset.publicDownloadUrl || dataset.r2PublicUrl) && (
+            <a
+              href={dataset.publicDownloadUrl || dataset.r2PublicUrl || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-5 h-11 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98"
+            >
+              <Download className="w-4 h-4" />
+              <span>Unduh Langsung (R2 Public)</span>
+            </a>
+          )}
         </div>
       </div>
 
       {/* Main Grid: ISO 19115 Metadata + Mini Map Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Comprehensive Metadata */}
+        {/* Left Column (col-span-2): Comprehensive Metadata */}
         <div className="lg:col-span-2 space-y-6">
           {/* Deskripsi Lengkap */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Database className="w-4 h-4 text-emerald-600" />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+            <h3 className="text-xs font-bold text-[#1A3BAF] uppercase tracking-wider flex items-center gap-2">
+              <Database className="w-4 h-4 text-[#1A3BAF]" />
               Deskripsi & Riwayat Data
             </h3>
-            <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
-              {dataset.description}
+            <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+              {dataset.description || dataset.abstract}
             </p>
           </div>
 
           {/* Asal Usul & Provenansi Data Geospasial */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-xs font-bold text-[#1A3BAF] uppercase tracking-wider flex items-center gap-2">
                 <Globe className="w-4 h-4 text-[#1A3BAF]" />
                 Asal Usul & Provenansi Data Resmi
               </h3>
@@ -287,9 +303,9 @@ export const DatasetDetailPage: React.FC = () => {
           </div>
 
           {/* ISO 19115 Standard Specification Table */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Layers className="w-4 h-4 text-emerald-600" />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            <h3 className="text-xs font-bold text-[#1A3BAF] uppercase tracking-wider flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#1A3BAF]" />
               Spesifikasi Metadata ISO 19115
             </h3>
 
@@ -332,9 +348,9 @@ export const DatasetDetailPage: React.FC = () => {
           </div>
 
           {/* OGC Web Services Endpoints */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Globe className="w-4 h-4 text-emerald-600" />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            <h3 className="text-xs font-bold text-[#1A3BAF] uppercase tracking-wider flex items-center gap-2">
+              <Globe className="w-4 h-4 text-[#1A3BAF]" />
               Layanan Interoperabilitas OGC (WMS / WFS)
             </h3>
 
@@ -345,7 +361,7 @@ export const DatasetDetailPage: React.FC = () => {
                     <span className="font-bold text-slate-700">WMS Endpoint</span>
                     <button
                       onClick={() => handleCopyEndpoint(dataset.wmsUrl!)}
-                      className="text-emerald-700 font-bold hover:underline flex items-center gap-1"
+                      className="text-[#1A3BAF] font-bold hover:underline flex items-center gap-1"
                     >
                       <Copy className="w-3 h-3" />
                       {copiedWms ? 'Tersalin' : 'Salin URL'}
@@ -366,7 +382,7 @@ export const DatasetDetailPage: React.FC = () => {
                     <span className="font-bold text-slate-700">WFS Endpoint</span>
                     <button
                       onClick={() => handleCopyEndpoint(dataset.wfsUrl!)}
-                      className="text-emerald-700 font-bold hover:underline flex items-center gap-1"
+                      className="text-[#1A3BAF] font-bold hover:underline flex items-center gap-1"
                     >
                       <Copy className="w-3 h-3" />
                       Salin URL
@@ -387,20 +403,20 @@ export const DatasetDetailPage: React.FC = () => {
         {/* Right Column: Mini Map Preview + Institution Profile */}
         <div className="space-y-6">
           {/* Mini Preview Map */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+          <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs">
+            <div className="p-4 bg-[#0C1D36] text-white flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                <Compass className="w-4 h-4 text-emerald-400" />
+                <Compass className="w-4 h-4 text-blue-400" />
                 Pratinjau Spasial
               </span>
               <button
                 onClick={() => navigate(`/webmap?addLayer=${encodeURIComponent(dataset.id)}`)}
-                className="text-[11px] text-emerald-400 hover:underline font-bold flex items-center gap-1"
+                className="text-[11px] text-blue-300 hover:text-white font-bold flex items-center gap-1 transition-colors"
               >
                 Buka Penuh <ExternalLink className="w-3 h-3" />
               </button>
             </div>
-            <div className="h-64 w-full relative bg-slate-100">
+            <div className="h-72 w-full relative bg-slate-100">
               <MapContainer
                 center={[-2.5489, 118.0149]}
                 zoom={4}
@@ -416,16 +432,16 @@ export const DatasetDetailPage: React.FC = () => {
                       key={`${dataset.id}-${geojsonData ? 'loaded' : 'empty'}`}
                       data={geojsonData}
                       style={{
-                        color: '#10b981',
+                        color: '#1A3BAF',
                         weight: 2,
-                        fillColor: '#10b981',
+                        fillColor: '#1A3BAF',
                         fillOpacity: 0.35,
                       }}
                       pointToLayer={(_feature, latlng) =>
                         L.circleMarker(latlng, {
                           radius: 5,
-                          color: '#10b981',
-                          fillColor: '#10b981',
+                          color: '#1A3BAF',
+                          fillColor: '#1A3BAF',
                           fillOpacity: 0.8,
                           weight: 1.5,
                         })
@@ -438,27 +454,28 @@ export const DatasetDetailPage: React.FC = () => {
           </div>
 
           {/* Wali Data Info Card */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-emerald-600" />
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-3.5">
+            <h4 className="text-xs font-bold text-[#1A3BAF] uppercase tracking-wider flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-[#1A3BAF]" />
               Instansi Wali Data
             </h4>
-            <div className="text-sm font-bold text-slate-800">
+            <div className="text-base font-bold text-slate-900">
               {dataset.node?.name || dataset.distribution || 'Instansi Produsen'}
             </div>
             {dataset.contactPerson && (
-              <div className="text-xs text-slate-600 flex items-center gap-1.5">
+              <div className="text-xs text-slate-600 flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span>{dataset.contactPerson}</span>
+                <span className="truncate">{dataset.contactPerson}</span>
               </div>
             )}
             {dataset.nodeId && (
               <div className="pt-2">
                 <Link
                   to={`/simpul/${dataset.nodeId}`}
-                  className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                  className="text-xs font-bold text-[#1A3BAF] hover:underline flex items-center gap-1"
                 >
-                  Lihat Profil Simpul Jaringan <ExternalLink className="w-3 h-3" />
+                  <span>Lihat Profil Simpul Jaringan</span>
+                  <ExternalLink className="w-3 h-3" />
                 </Link>
               </div>
             )}

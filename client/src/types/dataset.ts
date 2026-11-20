@@ -24,8 +24,11 @@ export interface NetworkNode {
 
 export type DataSourceStatus =
   | 'REAL'
+  | 'REAL_COMPLETE'
+  | 'REAL_COMPLETE_SERVICE'
   | 'REAL_VERIFIED'
   | 'REAL_PARTIAL_COVERAGE'
+  | 'MAP_SERVICE_ONLY'
   | 'DEMO'
   | 'FALLBACK'
   | 'PENDING_AUTHORIZATION'
@@ -62,6 +65,10 @@ export interface Dataset {
   wfsUrl?: string | null;
   wfsLayer?: string | null;
   downloadUrl?: string | null;
+  publicDownloadUrl?: string | null;
+  remoteKey?: string | null;
+  r2PublicUrl?: string | null;
+  storageSource?: string | null;
   geojsonUrl?: string | null;
   contactPerson?: string | null;
   distribution?: string | null;

@@ -7,9 +7,37 @@ export const userService = {
     return res.data;
   },
 
-  async getDownloads(): Promise<DownloadRecord[]> {
-    const res: any = await apiClient.get('/user/downloads');
-    return res.data || [];
+  async updateProfile(data: { name: string; institution?: string }): Promise<User> {
+    const res: any = await apiClient.put('/user/profile', data);
+    return res.data;
+  },
+
+  async getDownloads(params?: {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    startDate?: string;
+    endDate?: string;
+    search?: string;
+  }): Promise<DownloadRecord[]> {
+    const res: any = await apiClient.get('/user/downloads', { params });
+    // If paginated response object, return array
+    if (res && res.data && Array.isArray(res.data)) {
+      return res.data;
+    }
+    return res || [];
+  },
+
+  async getDownloadHistory(params?: {
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    startDate?: string;
+    endDate?: string;
+    search?: string;
+  }): Promise<{ data: DownloadRecord[]; pagination?: any }> {
+    const res: any = await apiClient.get('/downloads/history', { params });
+    return res;
   },
 
   async getBookmarks(): Promise<BookmarkRecord[]> {

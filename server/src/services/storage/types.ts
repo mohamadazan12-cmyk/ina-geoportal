@@ -17,7 +17,7 @@ export interface StoredFileMeta {
 }
 
 export interface StorageDriver {
-  readonly name: 'local' | 'vercel-blob';
+  readonly name: 'local' | 'vercel-blob' | 'r2' | 's3';
   readonly scope: StoreScope;
 
   /** True when the object exists and is readable. */
@@ -32,8 +32,8 @@ export interface StorageDriver {
   /** Full object decoded as UTF-8 text. */
   readText(key: string): Promise<string>;
 
-  /** Node Readable stream for large payloads. */
-  createReadStream(key: string): Promise<Readable>;
+  /** Node Readable stream for large payloads, supporting optional HTTP byte range. */
+  createReadStream(key: string, range?: { start?: number; end?: number }): Promise<Readable>;
 
   /** Upload/overwrite an object. */
   upload(key: string, data: Buffer | string, contentType?: string): Promise<StoredFileMeta>;

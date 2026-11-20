@@ -34,7 +34,7 @@ const GUIDES_DATA: GuideItem[] = [
   },
   {
     id: 'guide-handbook',
-    title: 'Standar Data Geospasial Handbook',
+    title: 'Standar Data Geospasial Handbook (SNI & ISO)',
     category: 'Standarisasi JIGN',
     size: '8.1 MB',
     summary: 'Buku saku acuan struktur basis data, metadata ISO 19115, aturan topologi geometri, serta tata kelola interoperabilitas JIGN.',
@@ -58,27 +58,29 @@ const GUIDES_DATA: GuideItem[] = [
     ],
   },
   {
-    id: 'guide-metadata',
-    title: 'Petunjuk Penggunaan Metadata Editor',
-    category: 'Pengelolaan Data',
+    id: 'guide-qgis',
+    title: 'Petunjuk Integrasi Ina-Geoportal ke QGIS Desktop',
+    category: 'Aplikasi GIS Desktop',
     size: '3.5 MB',
-    summary: 'Panduan teknis pengisian elemen wajib dan kondisional metadata geospasial sesuai standar ISO 19115/19139 menggunakan aplikasi Palapa Metadata Editor.',
+    summary: 'Langkah menghubungkan layanan Web Map Service (WMS) dan Web Feature Service (WFS) Ina-Geoportal ke software QGIS 3.x.',
     steps: [
-      'Unduh dan pasang aplikasi Palapa Desktop atau akses Metadata Editor daring.',
-      'Buka berkas shapefile atau geodatabase yang akan didokumentasikan.',
-      'Lengkapi informasi identifikasi, batas wilayah koordinat, riwayat lineage, dan kontak narahubung data.',
-      'Ekspor metadata ke format XML standar ISO 19139 untuk diunggah ke Ina-Geoportal.',
+      'Salin URL WMS atau WFS dari halaman detail katalog data geospasial.',
+      'Buka QGIS Desktop, buka panel Browser dan klik kanan pada WMS/WMTS atau WFS / OGC API - Features.',
+      'Pilih New Connection, masukkan Nama Koneksi dan tempelkan URL layanan yang sudah disalin.',
+      'Klik OK, perluas layer yang muncul, lalu seret (drag and drop) layer ke kanvas kerja QGIS Anda.',
     ],
   },
   {
-    id: 'guide-sni',
-    title: 'Katalog SNI Informasi Geospasial 2026',
-    category: 'Katalog Standar Resmi',
-    size: '5.2 MB',
-    summary: 'Daftar lengkap Standar Nasional Indonesia (SNI) bidang informasi geospasial yang telah ditetapkan BSN dan BIG sebagai pedoman resmi nasional.',
+    id: 'guide-simpul',
+    title: 'Prosedur Penghubungan Simpul Jaringan Baru ke JIGN',
+    category: 'Tata Kelola Jaringan',
+    size: '4.2 MB',
+    summary: 'Pedoman resmi Badan Informasi Geospasial bagi instansi kementerian, lembaga, provinsi, dan kabupaten/kota yang ingin menghubungkan geoportal lokal ke Jaringan Informasi Geospasial Nasional.',
     steps: [
-      'Cari nomor SNI berdasarkan topik: Peta Rupabumi, Peta Tematik, Batas Daerah, atau Geodesi.',
-      'Gunakan dokumen SNI sebagai dasar acuan spesifikasi teknis kerangka acuan kerja (KAK).',
+      'Siapkan infrastruktur server GIS dan aplikasi Palapa versi terbaru.',
+      'Pastikan metadata katalog telah tervalidasi skema ISO 19139.',
+      'Kirimkan surat permohonan resmi koneksi simpul jaringan ke Pusat Pengelolaan dan Penyebarluasan Informasi Geospasial (PPIG) BIG.',
+      'Tim teknis BIG akan melakukan uji interoperabilitas endpoint CSW/WFS sebelum mengaktifkan status simpul.',
     ],
   },
 ];
@@ -88,67 +90,82 @@ export const BantuanPage: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string | null>('guide-registrasi');
 
   const toggleExpand = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
+    setExpandedId((prev) => (prev === id ? null : id));
   };
 
   return (
-    <div className="w-full flex flex-col px-5 pt-4 pb-8 select-none">
-      {/* Header with Back button and Title (exact Figma 185:1682) */}
-      <div className="flex items-center gap-3 mb-4">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 select-none flex flex-col space-y-6">
+      {/* 1. Header with Back button and Title (exact Figma 185:1596) */}
+      <div className="flex items-center gap-3.5">
         <button
           type="button"
           onClick={() => navigate('/lainnya')}
           aria-label="Kembali ke menu Lainnya"
-          className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:text-[#1A3BAF] active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-700 hover:text-[#1A3BAF] active:scale-95 transition-transform"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-[#1E1E1E] tracking-tight">
-            Bantuan & Panduan
+          <h1 className="text-xl md:text-3xl font-bold text-[#1E1E1E] tracking-tight">
+            Pusat Bantuan & Panduan
           </h1>
-          <span className="text-[11px] text-[#717171]">
-            Panduan resmi dan tutorial operasional Ina-Geoportal
+          <span className="text-xs md:text-sm text-[#717171]">
+            Petunjuk Penggunaan, Handbook SNI, dan Standarisasi Pemetaan JIGN
           </span>
         </div>
       </div>
 
-      {/* Guides List (exact Figma 185:1596 Group 2 - Group 6) */}
-      <div className="space-y-3">
+      {/* 2. Intro Information Card */}
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1A3BAF] flex items-center justify-center shrink-0">
+          <HelpCircle className="w-5 h-5 stroke-[2.2]" />
+        </div>
+        <div>
+          <h2 className="font-bold text-sm md:text-base text-[#1E1E1E]">
+            Dokumentasi Teknis & Panduan Resmi
+          </h2>
+          <p className="text-xs md:text-sm text-slate-600 leading-relaxed mt-1">
+            Unduh berkas handbook format PDF resmi atau pelajari langkah-langkah tata cara pemanfaatan layanan data geospasial pada daftar panduan di bawah ini.
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Guides Accordion List */}
+      <div className="space-y-3.5">
         {GUIDES_DATA.map((item) => {
           const isExpanded = expandedId === item.id;
           return (
             <div
               key={item.id}
-              className="w-full bg-white rounded-lg shadow-sm border border-slate-100 overflow-hidden transition-all hover:shadow-md"
+              className="w-full bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden transition-all hover:shadow-md hover:border-[#1A3BAF]/30"
             >
               {/* Header trigger row */}
               <button
                 type="button"
                 onClick={() => toggleExpand(item.id)}
-                className="w-full p-3.5 flex items-center justify-between text-left gap-3"
+                className="w-full p-4 md:p-5 flex items-center justify-between text-left gap-4"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-blue-50 text-[#1A3BAF] flex items-center justify-center shrink-0">
-                    <BookOpen className="w-4 h-4 stroke-[2.2]" />
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1A3BAF] flex items-center justify-center shrink-0">
+                    <BookOpen className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] font-semibold text-[#1A3BAF] block">
+                    <span className="text-[10px] md:text-xs font-bold text-[#1A3BAF] block uppercase tracking-wider">
                       {item.category}
                     </span>
-                    <h3 className="font-semibold text-sm text-[#1E1E1E] leading-snug truncate">
+                    <h3 className="font-bold text-sm md:text-base text-[#1E1E1E] leading-snug truncate">
                       {item.title}
                     </h3>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] text-slate-400 font-mono">
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs text-slate-400 font-mono hidden sm:inline">
                     {item.size}
                   </span>
-                  <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
                     {isExpanded ? (
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown className="w-4 h-4 text-[#1A3BAF]" />
                     ) : (
                       <ChevronRight className="w-4 h-4" />
                     )}
@@ -158,16 +175,16 @@ export const BantuanPage: React.FC = () => {
 
               {/* Expanded content */}
               {isExpanded && (
-                <div className="px-4 pb-4 pt-1 border-t border-slate-50 bg-slate-50/50 space-y-3 animate-fadeIn text-xs">
-                  <p className="text-[#1E1E1E] leading-relaxed">
+                <div className="px-5 pb-5 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-4 animate-fadeIn text-xs md:text-sm">
+                  <p className="text-slate-700 leading-relaxed">
                     {item.summary}
                   </p>
 
-                  <div className="space-y-1.5">
-                    <span className="font-bold text-[11px] text-slate-700 uppercase tracking-wider block">
-                      Langkah-Langkah:
+                  <div className="space-y-2 bg-white p-4 rounded-xl border border-slate-200/80">
+                    <span className="font-bold text-xs uppercase tracking-wider text-slate-800 block">
+                      Langkah-Langkah Pelaksanaan:
                     </span>
-                    <ol className="list-decimal list-inside space-y-1 text-slate-700 leading-normal pl-1">
+                    <ol className="list-decimal list-inside space-y-1.5 text-slate-700 leading-normal pl-1 text-xs">
                       {item.steps.map((st, i) => (
                         <li key={i} className="pl-1">
                           <span className="text-slate-800">{st}</span>
@@ -176,14 +193,14 @@ export const BantuanPage: React.FC = () => {
                     </ol>
                   </div>
 
-                  <div className="pt-1 flex items-center gap-2">
+                  <div className="pt-1 flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={() => alert(`Mengunduh dokumen panduan: ${item.title}`)}
-                      className="flex-1 h-9 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-colors"
+                      onClick={() => alert(`Mengunduh dokumen panduan resmi: ${item.title}`)}
+                      className="h-10 px-5 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Unduh PDF ({item.size})</span>
+                      <span>Unduh Dokumen Panduan ({item.size})</span>
                     </button>
                   </div>
                 </div>
@@ -191,25 +208,6 @@ export const BantuanPage: React.FC = () => {
             </div>
           );
         })}
-      </div>
-
-      {/* FAQ Banner */}
-      <div className="mt-5 p-4 bg-gradient-to-br from-[#0C1D36] to-[#1A3BAF] rounded-lg text-white shadow-md">
-        <div className="flex items-center gap-2 mb-1.5">
-          <HelpCircle className="w-4 h-4 text-emerald-400" />
-          <h4 className="font-bold text-sm">Butuh Bantuan Lebih Lanjut?</h4>
-        </div>
-        <p className="text-xs text-slate-200 leading-relaxed mb-3">
-          Tim Helpdesk JIGN siap membantu integrasi simpul jaringan, kendala login, atau permohonan data geospasial khusus.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate('/kontak')}
-          className="w-full h-9 bg-white text-[#1A3BAF] hover:bg-slate-100 rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-colors"
-        >
-          <span>Hubungi Kontak Kami</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
       </div>
     </div>
   );

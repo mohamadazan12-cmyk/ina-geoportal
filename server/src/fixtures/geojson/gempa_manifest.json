@@ -1,0 +1,277 @@
+{
+  "datasetId": "ds-rawan-gempa",
+  "upstreamUrl": "https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/SUMBER_DAYA_ALAM_DAN_LINGKUNGAN/MapServer/12",
+  "sourceAgency": "Pusat Vulkanologi dan Mitigasi Bencana Geologi (PVMBG) & BIG",
+  "totalFeatures": 11439,
+  "hazardClasses": {
+    "Kawasan Rawan Bencana Gempabumi Tinggi": 2408,
+    "Kawasan Rawan Bencana Gempabumi Menengah": 4530,
+    "Kawasan Rawan Bencana Gempabumi Rendah": 3829,
+    "Kawasan Rawan Bencana Gempabumi Sangat Rendah": 672
+  },
+  "status": "REAL_COMPLETE",
+  "disclaimer": "Zona bahaya gempa bumi tektonik PVMBG & BIG. Bukan untuk perancangan teknik sipil atau kekuatan struktur bangunan (SNI Gempa 1726). Berbeda secara konseptual dengan sesar aktif PusGen (garis) dan indeks bahaya bencana BNPB (raster).",
+  "totalChunks": 52,
+  "chunks": [
+    {
+      "file": "chunk_0.json",
+      "offset": 0,
+      "count": 250
+    },
+    {
+      "file": "chunk_250.json",
+      "offset": 250,
+      "count": 250
+    },
+    {
+      "file": "chunk_500.json",
+      "offset": 500,
+      "count": 250
+    },
+    {
+      "file": "chunk_750.json",
+      "offset": 750,
+      "count": 250
+    },
+    {
+      "file": "chunk_1000.json",
+      "offset": 1000,
+      "count": 250
+    },
+    {
+      "file": "chunk_1250.json",
+      "offset": 1250,
+      "count": 250
+    },
+    {
+      "file": "chunk_1500.json",
+      "offset": 1500,
+      "count": 250
+    },
+    {
+      "file": "chunk_1750.json",
+      "offset": 1750,
+      "count": 250
+    },
+    {
+      "file": "chunk_2000.json",
+      "offset": 2000,
+      "count": 250
+    },
+    {
+      "file": "chunk_2250.json",
+      "offset": 2250,
+      "count": 250
+    },
+    {
+      "file": "chunk_2500.json",
+      "offset": 2500,
+      "count": 250
+    },
+    {
+      "file": "chunk_2750.json",
+      "offset": 2750,
+      "count": 250
+    },
+    {
+      "file": "chunk_3000.json",
+      "offset": 3000,
+      "count": 250
+    },
+    {
+      "file": "chunk_3250.json",
+      "offset": 3250,
+      "count": 250
+    },
+    {
+      "file": "chunk_3500.json",
+      "offset": 3500,
+      "count": 250
+    },
+    {
+      "file": "chunk_3750.json",
+      "offset": 3750,
+      "count": 250
+    },
+    {
+      "file": "chunk_4000.json",
+      "offset": 4000,
+      "count": 250
+    },
+    {
+      "file": "chunk_4250.json",
+      "offset": 4250,
+      "count": 250
+    },
+    {
+      "file": "chunk_4500.json",
+      "offset": 4500,
+      "count": 250
+    },
+    {
+      "file": "chunk_4750.json",
+      "offset": 4750,
+      "count": 250
+    },
+    {
+      "file": "chunk_5000.json",
+      "offset": 5000,
+      "count": 250
+    },
+    {
+      "file": "chunk_5250.json",
+      "offset": 5250,
+      "count": 250
+    },
+    {
+      "file": "chunk_5500.json",
+      "offset": 5500,
+      "count": 250
+    },
+    {
+      "file": "chunk_5750.json",
+      "offset": 5750,
+      "count": 250
+    },
+    {
+      "file": "chunk_6000.json",
+      "offset": 6000,
+      "count": 250
+    },
+    {
+      "file": "chunk_6250.json",
+      "offset": 6250,
+      "count": 250
+    },
+    {
+      "file": "chunk_6500.json",
+      "offset": 6500,
+      "count": 250
+    },
+    {
+      "file": "chunk_6750.json",
+      "offset": 6750,
+      "count": 250
+    },
+    {
+      "file": "chunk_7000.json",
+      "offset": 7000,
+      "count": 250
+    },
+    {
+      "file": "chunk_7250.json",
+      "offset": 7250,
+      "count": 250
+    },
+    {
+      "file": "chunk_7500.json",
+      "offset": 7500,
+      "count": 250
+    },
+    {
+      "file": "chunk_7750.json",
+      "offset": 7750,
+      "count": 250
+    },
+    {
+      "file": "chunk_8000.json",
+      "offset": 8000,
+      "count": 250
+    },
+    {
+      "file": "chunk_8250.json",
+      "offset": 8250,
+      "count": 250
+    },
+    {
+      "file": "chunk_8500.json",
+      "offset": 8500,
+      "count": 250
+    },
+    {
+      "file": "chunk_8750.json",
+      "offset": 8750,
+      "count": 250
+    },
+    {
+      "file": "chunk_9000.json",
+      "offset": 9000,
+      "count": 250
+    },
+    {
+      "file": "chunk_9250.json",
+      "offset": 9250,
+      "count": 250
+    },
+    {
+      "file": "chunk_9500.json",
+      "offset": 9500,
+      "count": 250
+    },
+    {
+      "file": "chunk_9750.json",
+      "offset": 9750,
+      "count": 250
+    },
+    {
+      "file": "chunk_10000.json",
+      "offset": 10000,
+      "count": 250
+    },
+    {
+      "file": "chunk_10250.json",
+      "offset": 10250,
+      "count": 250
+    },
+    {
+      "file": "chunk_10500.json",
+      "offset": 10500,
+      "count": 250
+    },
+    {
+      "file": "chunk_10750.json",
+      "offset": 10750,
+      "count": 250
+    },
+    {
+      "file": "chunk_11000.json",
+      "offset": 11000,
+      "count": 250
+    },
+    {
+      "file": "chunk_11250.json",
+      "offset": 11250,
+      "count": 30
+    },
+    {
+      "file": "chunk_11280.json",
+      "offset": 11280,
+      "count": 30
+    },
+    {
+      "file": "chunk_11310.json",
+      "offset": 11310,
+      "count": 30
+    },
+    {
+      "file": "chunk_11340.json",
+      "offset": 11340,
+      "count": 30
+    },
+    {
+      "file": "chunk_11370.json",
+      "offset": 11370,
+      "count": 30
+    },
+    {
+      "file": "chunk_11400.json",
+      "offset": 11400,
+      "count": 30
+    },
+    {
+      "file": "chunk_11430.json",
+      "offset": 11430,
+      "count": 9
+    }
+  ]
+}

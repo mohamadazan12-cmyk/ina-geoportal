@@ -20,6 +20,13 @@ const { execFileSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+try {
+  require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
+  require('dotenv').config({ path: path.resolve(__dirname, '..', '.env'), override: true });
+} catch {
+  // dotenv optional
+}
+
 const PRISMA_DIR = path.resolve(__dirname, '..', 'prisma');
 
 function resolveTarget() {
@@ -46,13 +53,22 @@ function main() {
   console.log(`[prisma-generate] Target: ${target} → prisma/${schemaFile}`);
 
   try {
-    execFileSync(
-      process.platform === 'win32' ? 'npx.cmd' : 'npx',
-      ['prisma', 'generate', `--schema=${schemaPath}`],
-      { stdio: 'inherit', cwd: path.resolve(__dirname, '..') }
-    );
+    const relSchema = `prisma/${schemaFile}`;
+    if (process.platform === 'win32') {
+      execFileSync(
+        'cmd.exe',
+        ['/c', 'npx', 'prisma', 'generate', `--schema=${relSchema}`],
+        { stdio: 'inherit', cwd: path.resolve(__dirname, '..') }
+      );
+    } else {
+      execFileSync(
+        'npx',
+        ['prisma', 'generate', `--schema=${relSchema}`],
+        { stdio: 'inherit', cwd: path.resolve(__dirname, '..') }
+      );
+    }
   } catch (error) {
-    console.error('[prisma-generate] prisma generate failed.');
+    console.error('[prisma-generate] prisma generate failed:', error.message);
     process.exitCode = 1;
   }
 }

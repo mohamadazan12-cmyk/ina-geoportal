@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type BadgeVariant = 'demo' | 'public' | 'restricted' | 'online' | 'synced' | 'offline' | 'unknown' | 'info' | 'gray' | 'real' | 'pending' | 'partial';
+export type BadgeVariant = 'demo' | 'public' | 'restricted' | 'online' | 'synced' | 'offline' | 'unknown' | 'info' | 'gray' | 'real' | 'pending' | 'partial' | 'r2';
 
 interface BadgeProps {
   variant?: BadgeVariant;
@@ -19,6 +19,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantMap: Record<BadgeVariant, string> = {
     real: 'bg-emerald-600 text-white font-semibold shadow-xs',
+    r2: 'bg-blue-600 text-white font-semibold shadow-xs',
     partial: 'bg-teal-700 text-white font-semibold shadow-xs',
     pending: 'bg-amber-600 text-white font-semibold shadow-xs',
     demo: 'bg-amber-100 text-amber-800 border border-amber-300 font-semibold',

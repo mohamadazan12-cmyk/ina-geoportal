@@ -171,14 +171,53 @@ export const config = {
   },
 
   // ---------------------------------------------------------------------
-  // Object storage (Vercel Blob in production)
+  // Object storage (Cloudflare R2 / AWS S3 / Vercel Blob / Local)
   // ---------------------------------------------------------------------
-  /** Storage driver: "local" (dev/tests) or "vercel-blob" (production). */
-  get storageDriver(): 'local' | 'vercel-blob' {
+  /** Storage driver: "local" (dev/tests), "r2" (Cloudflare R2/S3), or "vercel-blob" (production). */
+  get storageDriver(): 'local' | 'vercel-blob' | 'r2' {
     const explicit = (process.env.STORAGE_DRIVER || '').trim().toLowerCase();
-    if (explicit === 'vercel-blob' || explicit === 'local') return explicit;
-    // Default to blob only when a token is actually present.
+    if (explicit === 'r2' || explicit === 'vercel-blob' || explicit === 'local') return explicit;
+    // Auto-detect based on configured credentials
+    if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME) {
+      return 'r2';
+    }
     return process.env.BLOB_READ_WRITE_TOKEN ? 'vercel-blob' : 'local';
+  },
+
+  get r2AccountId(): string {
+    return process.env.R2_ACCOUNT_ID || '';
+  },
+
+  get r2AccessKeyId(): string {
+    return process.env.R2_ACCESS_KEY_ID || '';
+  },
+
+  get r2SecretAccessKey(): string {
+    return process.env.R2_SECRET_ACCESS_KEY || '';
+  },
+
+  get r2BucketName(): string {
+    return process.env.R2_BUCKET_NAME || '';
+  },
+
+  get r2Endpoint(): string {
+    if (process.env.R2_ENDPOINT) return process.env.R2_ENDPOINT;
+    const accountId = process.env.R2_ACCOUNT_ID;
+    if (accountId) return `https://${accountId}.r2.cloudflarestorage.com`;
+    return '';
+  },
+
+  get r2PublicUrl(): string {
+    return (process.env.R2_PUBLIC_URL || process.env.PUBLIC_LAYER_BASE_URL || '').replace(/\/+$/, '');
+  },
+
+  get hasR2Credentials(): boolean {
+    return Boolean(
+      process.env.R2_ACCESS_KEY_ID &&
+        process.env.R2_SECRET_ACCESS_KEY &&
+        process.env.R2_BUCKET_NAME &&
+        (process.env.R2_ENDPOINT || process.env.R2_ACCOUNT_ID)
+    );
   },
 
   get blobReadWriteToken(): string {

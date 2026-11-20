@@ -1,8 +1,11 @@
 import https from 'https';
 import http from 'http';
-import { getStorageDriver, geojsonKey, resetStorageDrivers } from './storage';
+import { getStorageDriver, geojsonKey, resetStorageDrivers as storageResetDrivers, toCanonicalKey } from './storage';
 
 export type DataSourceStatus =
+  | 'REAL_COMPLETE'
+  | 'REAL_COMPLETE_SERVICE'
+  | 'MAP_SERVICE_ONLY'
   | 'REAL_VERIFIED'
   | 'REAL_PARTIAL_COVERAGE'
   | 'REAL'
@@ -26,6 +29,10 @@ export interface GeospatialDataResult {
     totalPages: number;
     hasMore: boolean;
   };
+  storageDriver?: string;
+  storageSource?: 'r2' | 'local' | 'local-fallback';
+  canonicalKey?: string;
+  publicUrl?: string;
 }
 
 export interface LiveStatusResult {
@@ -57,20 +64,23 @@ const REAL_GEOJSON_MAP: Record<
     agency: 'Badan Informasi Geospasial (BIG)',
     realStatus: 'REAL_VERIFIED',
     fallbackStatus: 'FALLBACK',
-    totalSourceRecords: 541,
+    totalSourceRecords: 548,
   },
   'ds-jalan-nasional': {
+    real: 'real_jalan_nasional.json',
     demo: 'jalan_nasional.json',
-    agency: 'Kementerian Pekerjaan Umum dan Perumahan Rakyat (PUPR)',
-    realStatus: 'PENDING_AUTHORIZATION',
+    agency: 'Kementerian Pekerjaan Umum dan Perumahan Rakyat (PUPR) & BIG',
+    realStatus: 'REAL_PARTIAL_COVERAGE',
     fallbackStatus: 'PENDING_AUTHORIZATION',
-    totalSourceRecords: 3306,
+    totalSourceRecords: 3377,
   },
   'ds-rawan-gempa': {
+    real: 'real_rawan_bencana_gempa.json',
     demo: 'rawan_bencana_gempa.json',
-    agency: 'Badan Nasional Penanggulangan Bencana (BNPB)',
-    realStatus: 'FALLBACK',
+    agency: 'Badan Nasional Penanggulangan Bencana (BNPB) & PVMBG',
+    realStatus: 'REAL_PARTIAL_COVERAGE',
     fallbackStatus: 'FALLBACK',
+    totalSourceRecords: 11439,
   },
   'ds-tutupan-lahan': {
     real: 'real_tutupan_lahan.json',
@@ -78,7 +88,7 @@ const REAL_GEOJSON_MAP: Record<
     agency: 'Badan Informasi Geospasial (BIG)',
     realStatus: 'REAL_PARTIAL_COVERAGE',
     fallbackStatus: 'FALLBACK',
-    totalSourceRecords: 97002,
+    totalSourceRecords: 1284804,
   },
   'ds-faskes': {
     real: 'real_fasilitas_kesehatan.json',
@@ -86,7 +96,7 @@ const REAL_GEOJSON_MAP: Record<
     agency: 'Badan Informasi Geospasial (BIG)',
     realStatus: 'REAL_PARTIAL_COVERAGE',
     fallbackStatus: 'FALLBACK',
-    totalSourceRecords: 102,
+    totalSourceRecords: 4021,
   },
   'ds-rbi': {
     demo: 'rupa_bumi_indonesia.json',
@@ -99,17 +109,17 @@ const REAL_GEOJSON_MAP: Record<
 
 const LIVE_ENDPOINTS: Record<string, { url: string; authRequired?: boolean }> = {
   'ds-batas-kabkot': {
-    url: 'https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/BATAS_KABKOTA_AR/MapServer/0?f=json',
+    url: 'https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/BATAS_WILAYAH/MapServer/2?f=json',
   },
   'ds-jalan-nasional': {
-    url: 'https://sigi.pu.go.id/geoapi/api/v1/dataset-meta/jalan_nasional',
+    url: 'https://sigi.pu.go.id/geoapi/metadata/ast_bm_jalan_nasional_iri_v3.xml',
     authRequired: true,
   },
   'ds-rawan-gempa': {
     url: 'https://gis.bnpb.go.id/server/rest/services/inarisk/Faults/MapServer?f=json',
   },
   'ds-tutupan-lahan': {
-    url: 'https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer/226?f=json',
+    url: 'https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/SUMBER_DAYA_ALAM_DAN_LINGKUNGAN/MapServer/0?f=json',
   },
   'ds-faskes': {
     url: 'https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer/102?f=json',
@@ -147,17 +157,42 @@ function featureIntersectsBbox(feature: any, bbox: [number, number, number, numb
   return true;
 }
 
+interface ReadFixtureResult {
+  text: string;
+  source: 'r2' | 'local' | 'local-fallback';
+  canonicalKey: string;
+  publicUrl: string;
+}
+
+const fixtureCache = new Map<string, ReadFixtureResult>();
+
+export function clearFixtureCache(): void {
+  fixtureCache.clear();
+}
+
 /**
  * Helper to read a GeoJSON fixture via the storage abstraction.
  */
-async function readGeojsonFixture(fileName: string): Promise<any> {
+async function readGeojsonFixture(fileName: string): Promise<ReadFixtureResult> {
   const driver = getStorageDriver('public');
-  const key = geojsonKey(fileName);
+  const canonicalKey = toCanonicalKey(fileName);
+  const cacheKey = `${driver.name}:${canonicalKey}`;
 
-  if (!(await driver.exists(key))) {
+  if (fixtureCache.has(cacheKey)) {
+    return fixtureCache.get(cacheKey)!;
+  }
+
+  if (!(await driver.exists(canonicalKey))) {
     throw new Error(`Berkas data fisik '${fileName}' tidak ditemukan.`);
   }
-  return driver.readText(key);
+  const text = await driver.readText(canonicalKey);
+  const source: 'r2' | 'local' | 'local-fallback' = (driver as any).getActiveSource
+    ? (driver as any).getActiveSource()
+    : (driver.name as any);
+  const publicUrl = driver.getPublicUrl(canonicalKey) || '';
+  const result: ReadFixtureResult = { text, source, canonicalKey, publicUrl };
+  fixtureCache.set(cacheKey, result);
+  return result;
 }
 
 /**
@@ -169,7 +204,9 @@ export async function getDatasetGeoJSON(
   preferDemo: boolean = false,
   page?: number,
   limit?: number,
-  bbox?: [number, number, number, number]
+  bbox?: [number, number, number, number],
+  scope?: string,
+  full?: boolean
 ): Promise<GeospatialDataResult> {
   const config = REAL_GEOJSON_MAP[datasetId];
   if (!config) {
@@ -180,27 +217,73 @@ export async function getDatasetGeoJSON(
   let isDemo = false;
   let sourceFile = '';
   let status: DataSourceStatus = config.realStatus;
+  let storageSource: 'r2' | 'local' | 'local-fallback' = 'local';
+  let canonicalKey = '';
+  let publicUrl = '';
+
+  const isFullNational = full === true || scope === 'national';
 
   // 1. If not preferDemo and real file exists, serve real data
-  if (!preferDemo && config.real) {
-    try {
-      const text = await readGeojsonFixture(config.real);
-      loadedData = JSON.parse(text);
-      isDemo = false;
-      sourceFile = config.real;
-      status = config.realStatus;
-    } catch {
-      // If parse fails or file missing, fall through to fallback demo
+  if (!preferDemo) {
+    let targetFile = config.real;
+    if (isFullNational || (bbox && datasetId === 'ds-jalan-nasional')) {
+      if (datasetId === 'ds-jalan-nasional') {
+        targetFile = 'real_jalan_nasional_full.json';
+        status = 'REAL_COMPLETE';
+      }
+    }
+    if (isFullNational || (bbox && datasetId === 'ds-faskes')) {
+      if (datasetId === 'ds-faskes') {
+        targetFile = 'real_fasilitas_kesehatan_national.json';
+        status = 'REAL_COMPLETE';
+      }
+    }
+    if (isFullNational) {
+      if (datasetId === 'ds-batas-kabkot') {
+        targetFile = 'real_batas_kabupaten_548.json';
+        status = 'REAL_COMPLETE';
+      }
+    }
+
+    if (targetFile) {
+      try {
+        const fixtureRes = await readGeojsonFixture(targetFile);
+        loadedData = JSON.parse(fixtureRes.text);
+        isDemo = false;
+        sourceFile = targetFile;
+        storageSource = fixtureRes.source;
+        canonicalKey = fixtureRes.canonicalKey;
+        publicUrl = fixtureRes.publicUrl;
+      } catch {
+        // If target file fails, fall back to default real file
+        if (config.real && targetFile !== config.real) {
+          try {
+            const fixtureRes = await readGeojsonFixture(config.real);
+            loadedData = JSON.parse(fixtureRes.text);
+            isDemo = false;
+            sourceFile = config.real;
+            status = config.realStatus;
+            storageSource = fixtureRes.source;
+            canonicalKey = fixtureRes.canonicalKey;
+            publicUrl = fixtureRes.publicUrl;
+          } catch {
+            // fall through
+          }
+        }
+      }
     }
   }
 
   // 2. Serve demo / fallback fixture
   if (!loadedData) {
-    const text = await readGeojsonFixture(config.demo);
-    loadedData = JSON.parse(text);
+    const fixtureRes = await readGeojsonFixture(config.demo);
+    loadedData = JSON.parse(fixtureRes.text);
     isDemo = true;
     sourceFile = config.demo;
     status = config.fallbackStatus;
+    storageSource = fixtureRes.source;
+    canonicalKey = fixtureRes.canonicalKey;
+    publicUrl = fixtureRes.publicUrl;
   }
 
   let allFeatures = Array.isArray(loadedData.features) ? loadedData.features : [];
@@ -213,8 +296,8 @@ export async function getDatasetGeoJSON(
   const totalCount = allFeatures.length;
 
   // 3. Handle GeoJSON pagination when requested
-  if (page !== undefined && limit !== undefined && limit > 0) {
-    const p = Math.max(1, page);
+  if (limit !== undefined && limit > 0) {
+    const p = Math.max(1, page || 1);
     const l = Math.max(1, limit);
     const start = (p - 1) * l;
     const paginatedFeatures = allFeatures.slice(start, start + l);
@@ -241,6 +324,10 @@ export async function getDatasetGeoJSON(
       sourceAgency: config.agency,
       sourceFile,
       pagination: paginatedData.pagination,
+      storageDriver: (getStorageDriver('public') as any).name,
+      storageSource,
+      canonicalKey,
+      publicUrl,
     };
   }
 
@@ -257,6 +344,10 @@ export async function getDatasetGeoJSON(
     totalCount,
     sourceAgency: config.agency,
     sourceFile,
+    storageDriver: (getStorageDriver('public') as any).name,
+    storageSource,
+    canonicalKey,
+    publicUrl,
   };
 }
 
@@ -408,6 +499,9 @@ function enrichDatasetTelemetry(datasetId: string, details: Record<string, any>)
     enriched.accessRequestDoc = 'docs/PUPR_ACCESS_REQUEST.md';
     enriched.requestPortal = 'https://sigi.pu.go.id/geoapi/';
     enriched.vectorEndpoint = 'https://sigi.pu.go.id/geoapi/api/v1/jalan_nasional';
+    enriched.openAlternative =
+      'https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/SARANA_PRASARANA/MapServer/13';
+    enriched.openAlternativeRecords = 3197;
   } else if (datasetId === 'ds-rawan-gempa') {
     enriched.mapServerExportUrl =
       'https://gis.bnpb.go.id/server/rest/services/inarisk/Faults/MapServer/export';
@@ -420,14 +514,23 @@ function enrichDatasetTelemetry(datasetId: string, details: Record<string, any>)
       { id: 5, name: 'Sulawesi_Fault', geometryType: 'Polyline' },
       { id: 6, name: 'Sumatera_Fault', geometryType: 'Polyline' },
     ];
+    enriched.earthquakeHazardZoneLayer =
+      'https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/SUMBER_DAYA_ALAM_DAN_LINGKUNGAN/MapServer/12';
+    enriched.earthquakeHazardRecords = 11439;
     enriched.legalDisclaimer =
       'Bukan untuk perancangan teknik sipil atau kekuatan struktur bangunan (SNI Gempa 1726).';
   } else if (datasetId === 'ds-tutupan-lahan') {
-    enriched.totalSourceRecords = 97002;
+    enriched.totalSourceRecords = 1284804;
+    enriched.masterLayerUrl =
+      'https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/SUMBER_DAYA_ALAM_DAN_LINGKUNGAN/MapServer/0';
     enriched.maxRecordCount = 1000;
   } else if (datasetId === 'ds-rbi') {
     enriched.totalCartographicLayers = 890;
     enriched.satelliteWmsUrl = 'https://ows.piksel.big.go.id/wms';
+  } else if (datasetId === 'ds-faskes') {
+    enriched.satusehatEndpoint =
+      'https://api-satusehat.dto.kemkes.go.id/masterdata/v1/mastersaranaindex/mastersarana';
+    enriched.satusehatAuth = 'OAUTH2_BEARER_TOKEN';
   }
 
   return enriched;
@@ -582,6 +685,37 @@ export async function fetchUpstreamLandCoverBbox(
   });
 }
 
+/** Read the complete RBI 890 layers registry */
+export async function fetchRbiRegistry(): Promise<any> {
+  const driver = getStorageDriver('public');
+  const text = await driver.readText(geojsonKey('rbi_layers_registry.json'));
+  return JSON.parse(text);
+}
+
+/**
+ * Phase 16.4.1: Canonical public direct download URL for open geospatial datasets.
+ * In the unified public bucket (ina-geoportal-data), all datasets are directly accessible.
+ */
+export function getPublicDownloadUrl(datasetId: string, customDomain?: string): string {
+  const base = (customDomain || process.env.R2_PUBLIC_URL || 'https://data.inageoportal.go.id').replace(/\/+$/, '');
+  switch (datasetId) {
+    case 'ds-batas-kabkot':
+      return `${base}/datasets/ds-batas-kabkot/full/real_batas_kabupaten_548.json`;
+    case 'ds-jalan-nasional':
+      return `${base}/datasets/ds-jalan-nasional/full/real_jalan_nasional_full.json`;
+    case 'ds-rawan-gempa':
+      return `${base}/geojson/web/real_rawan_bencana_gempa.json`;
+    case 'ds-tutupan-lahan':
+      return `${base}/geojson/web/real_tutupan_lahan.json`;
+    case 'ds-faskes':
+      return `${base}/datasets/ds-faskes/real_fasilitas_kesehatan_national.json`;
+    case 'ds-rbi':
+      return `${base}/datasets/ds-rbi/rbi_layers_registry.json`;
+    default:
+      return `${base}/datasets/${datasetId}`;
+  }
+}
+
 /**
  * Backwards-compatible object API.
  *
@@ -591,11 +725,15 @@ export async function fetchUpstreamLandCoverBbox(
 export const realGeospatialService = {
   getDatasetGeoJSON,
   getDownloadFilePath,
+  getPublicDownloadUrl,
   probeLiveStatus,
   fetchPuprLiveJalanNasional,
   fetchBnpbFaultLayers,
   fetchUpstreamLandCoverBbox,
+  fetchRbiRegistry,
 };
 
-/** Reset cached storage drivers — used by tests. */
-export { resetStorageDrivers };
+export function resetStorageDrivers(): void {
+  clearFixtureCache();
+  storageResetDrivers();
+}

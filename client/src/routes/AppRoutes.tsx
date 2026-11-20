@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
 import { HomePage } from '../pages/HomePage';
 import { WebmapPage } from '../pages/WebmapPage';
@@ -35,6 +35,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/kontak" element={<KontakKamiPage />} />
         <Route path="/simpul" element={<NetworkNodesPage />} />
         <Route path="/simpul/:nodeId" element={<NodeDetailPage />} />
+        <Route path="/simpul-jaringan" element={<Navigate to="/simpul" replace />} />
+        <Route path="/simpul-jaringan/:nodeId" element={<NodeDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route

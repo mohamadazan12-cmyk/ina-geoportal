@@ -99,8 +99,8 @@ export const FigmaMapOverlay: React.FC<FigmaMapOverlayProps> = ({
 
   return (
     <>
-      {/* 1. Top Floating Search Bar (exact Figma Frame 81:950) */}
-      <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col items-center">
+      {/* 1. Top Floating Search Bar (exact Figma Frame 81:950, responsive for desktop) */}
+      <div className="absolute top-4 left-4 right-4 md:top-6 md:left-6 md:right-auto md:w-[380px] z-[400] flex flex-col items-center">
         <form
           onSubmit={handleSearchSubmit}
           className="w-full h-12 bg-white/95 backdrop-blur-md rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] border border-slate-100 flex items-center px-4 transition-all focus-within:ring-2 focus-within:ring-[#1A3BAF]"
@@ -155,7 +155,7 @@ export const FigmaMapOverlay: React.FC<FigmaMapOverlayProps> = ({
       </div>
 
       {/* 2. Right-Hand Floating Map Controls Stack (exact Figma Frame 81:950) */}
-      <div className="absolute right-3.5 top-20 z-[400] flex flex-col gap-2.5 select-none">
+      <div className="absolute right-3.5 top-20 md:right-6 md:top-6 z-[400] flex flex-col gap-2.5 select-none">
         {/* Zoom In (+) */}
         <button
           type="button"

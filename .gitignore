@@ -151,6 +151,19 @@ backups/
 !server/src/fixtures/geojson/*.json
 !server/src/fixtures/**/*.geojson
 !client/src/constants/demoGeojson/*.json
+
+# --------------------------------------------------------------------------
+# OBJECT STORAGE ARCHIVES (>100 MiB or raw uncompressed ingestion chunks)
+# Stored on Cloudflare R2 / AWS S3 / Vercel Blob — never commit to GitHub (>100 MiB limit)
+# --------------------------------------------------------------------------
+server/src/fixtures/geojson/*_548.json
+server/src/fixtures/geojson/*_full.json
+server/src/fixtures/geojson/chunks_batas/
+server/src/fixtures/geojson/chunks_gempa/
+server/src/fixtures/geojson/tutupan_lahan_partitions/
+server/src/fixtures/geojson/.*_checkpoint.json
+.r2_migration_checkpoint.json
+*.r2_migration_checkpoint.json
 # UI image assets used by the Vite build
 !client/src/assets/**
 # Public static files (favicon, robots.txt, etc.)

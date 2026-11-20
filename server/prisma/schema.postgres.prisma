@@ -1,4 +1,4 @@
-﻿// ==========================================================================
+// ==========================================================================
 // POSTGRESQL VARIANT — production target (Neon / Vercel Postgres)
 // ==========================================================================
 // Generated from schema.prisma with the datasource provider switched to
@@ -18,8 +18,9 @@ datasource db {
   // - Production:  PostgreSQL (Neon)
   // Switch via the `prisma/schema.postgres.prisma` variant and
   // `prisma migrate deploy` against DATABASE_URL. See docs/POSTGRES_MIGRATION.md.
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {

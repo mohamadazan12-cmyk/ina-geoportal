@@ -6,12 +6,31 @@ import { generateToken } from '../utils/jwt';
 import { sendSuccess, sendError } from '../utils/responseFormatter';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { googleAuthService } from '../services/googleAuthService';
+import { config } from '../config';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nama minimal 2 karakter'),
   email: z.string().email('Format email tidak valid'),
-  password: z.string().min(6, 'Password minimal 6 karakter'),
+  password: z.string().min(8, 'Password minimal 8 karakter'),
+  confirmPassword: z.string().optional(),
   institution: z.string().optional(),
+  agreeTerms: z.boolean().optional(),
+}).refine((data) => {
+  if (data.confirmPassword !== undefined && data.confirmPassword !== data.password) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Konfirmasi password tidak cocok dengan password',
+  path: ['confirmPassword'],
+}).refine((data) => {
+  if (data.agreeTerms !== undefined && !data.agreeTerms) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Persetujuan syarat penggunaan wajib disetujui',
+  path: ['agreeTerms'],
 });
 
 const loginSchema = z.object({
@@ -22,6 +41,27 @@ const loginSchema = z.object({
 const googleAuthSchema = z.object({
   credential: z.string().min(1, 'Credential token Google wajib disertakan'),
 });
+
+export const SESSION_COOKIE_NAME = 'ina_geo_token';
+
+export function getSessionCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: config.isProduction,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+}
+
+export function getSessionCookieClearOptions() {
+  return {
+    httpOnly: true,
+    secure: config.isProduction,
+    sameSite: 'lax' as const,
+    path: '/',
+  };
+}
 
 export async function register(req: Request, res: Response): Promise<void> {
   try {
@@ -61,6 +101,9 @@ export async function register(req: Request, res: Response): Promise<void> {
       email: user.email,
       role: user.role,
     });
+
+    // Set secure HttpOnly cookie
+    res.cookie(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
 
     sendSuccess(
       res,
@@ -114,6 +157,9 @@ export async function login(req: Request, res: Response): Promise<void> {
       role: user.role,
     });
 
+    // Set secure HttpOnly cookie
+    res.cookie(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
+
     sendSuccess(res, {
       token,
       user: {
@@ -127,6 +173,11 @@ export async function login(req: Request, res: Response): Promise<void> {
   } catch (error: any) {
     sendError(res, 'LOGIN_FAILED', error.message || 'Gagal melakukan login', 500);
   }
+}
+
+export async function logout(_req: Request, res: Response): Promise<void> {
+  res.clearCookie(SESSION_COOKIE_NAME, getSessionCookieClearOptions());
+  sendSuccess(res, { loggedOut: true }, 'Logout berhasil');
 }
 
 export async function googleLogin(req: Request, res: Response): Promise<void> {
@@ -206,6 +257,9 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
       email: user.email,
       role: user.role,
     });
+
+    // Set secure HttpOnly cookie
+    res.cookie(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
 
     sendSuccess(
       res,

@@ -1,0 +1,129 @@
+{
+  "datasetId": "ds-tutupan-lahan",
+  "upstreamUrl": "https://kspservices.big.go.id/satupeta/rest/services/PUBLIK/SUMBER_DAYA_ALAM_DAN_LINGKUNGAN/MapServer/0",
+  "totalUpstreamFeatures": 1284804,
+  "status": "REAL_COMPLETE_SERVICE",
+  "serviceCapabilities": {
+    "type": "On-Demand BBOX Query Proxy + Cached Macro-Partitions",
+    "paginationSupported": true,
+    "geometryType": "Polygon",
+    "coordinateSystem": "EPSG:4326 (WGS84)",
+    "sumber": "Badan Informasi Geospasial (BIG) Satu Peta Penutup Lahan Nasional"
+  },
+  "partitions": [
+    {
+      "id": "reg_dki_jawa_barat",
+      "name": "DKI Jakarta & Jawa Bagian Barat",
+      "bbox": [
+        106.3,
+        -6.9,
+        107.5,
+        -5.9
+      ],
+      "featureCount": 250,
+      "file": "reg_dki_jawa_barat.json",
+      "sha256": "4c8a05d8d085fc5616e5eeb0287413800818e2ead448fe129bab0a9f2914555b",
+      "sizeBytes": 594212
+    },
+    {
+      "id": "reg_jawa_tengah_timur",
+      "name": "Jawa Tengah & Jawa Timur",
+      "bbox": [
+        109.5,
+        -8.5,
+        114.5,
+        -6.5
+      ],
+      "featureCount": 250,
+      "file": "reg_jawa_tengah_timur.json",
+      "sha256": "1b58e73deb86050070e19b2053bb966bbb5e349913d37ebd3ac325a815745c26",
+      "sizeBytes": 1647556
+    },
+    {
+      "id": "reg_sumatera_medan",
+      "name": "Sumatera Utara & Riau",
+      "bbox": [
+        98,
+        1.5,
+        102.5,
+        4.5
+      ],
+      "featureCount": 250,
+      "file": "reg_sumatera_medan.json",
+      "sha256": "7007bd3dde5a6e91defddb0b8d7dca0c7876ee61f8f10306b499709b4202f14e",
+      "sizeBytes": 2183547
+    },
+    {
+      "id": "reg_sumatera_selatan",
+      "name": "Sumatera Selatan & Bangka Belitung",
+      "bbox": [
+        103.5,
+        -4.5,
+        108.5,
+        -2
+      ],
+      "featureCount": 250,
+      "file": "reg_sumatera_selatan.json",
+      "sha256": "03628c2eb4fc67fbad3a91998ffa147978f19852c76a977a59521cad51a88c6c",
+      "sizeBytes": 739418
+    },
+    {
+      "id": "reg_kalimantan_ikn",
+      "name": "Kalimantan Timur (Kawasan IKN Nusantara)",
+      "bbox": [
+        115,
+        -2,
+        118,
+        0
+      ],
+      "featureCount": 250,
+      "file": "reg_kalimantan_ikn.json",
+      "sha256": "9afb1c8ae8cd99a9740677b7d50defc3235cd26d704dbbbf8bb9fe5e023f4672",
+      "sizeBytes": 42972177
+    },
+    {
+      "id": "reg_sulawesi_selatan",
+      "name": "Sulawesi Selatan & Barat",
+      "bbox": [
+        118.8,
+        -5.8,
+        120.8,
+        -3
+      ],
+      "featureCount": 250,
+      "file": "reg_sulawesi_selatan.json",
+      "sha256": "9a03e3ccce61f1269372b81ee83668454407f71559109be205858870a17da444",
+      "sizeBytes": 6928174
+    },
+    {
+      "id": "reg_bali_nusatenggara",
+      "name": "Bali & Nusa Tenggara Barat",
+      "bbox": [
+        114.4,
+        -9,
+        117,
+        -8
+      ],
+      "featureCount": 249,
+      "file": "reg_bali_nusatenggara.json",
+      "sha256": "f1d724093531d11749de4953ee2bb16b9a52597f2eb0d99313f8532b369b5f79",
+      "sizeBytes": 1916188
+    },
+    {
+      "id": "reg_papua_jayapura",
+      "name": "Papua & Teluk Cendrawasih",
+      "bbox": [
+        134,
+        -3.5,
+        141,
+        -2
+      ],
+      "featureCount": 250,
+      "file": "reg_papua_jayapura.json",
+      "sha256": "157cb8ee81649b947b8ec4e5161c4175e09c8e6a7d4f5c0d04af09193a9210ce",
+      "sizeBytes": 423024
+    }
+  ],
+  "totalPartitionFeatures": 1999,
+  "timestamp": "2026-11-18T16:05:35.760Z"
+}

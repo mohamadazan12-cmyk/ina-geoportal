@@ -13,6 +13,7 @@ import { FigmaMapOverlay } from './FigmaMapOverlay';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 import { useMapStore } from '../../store/useMapStore';
 import { datasetService } from '../../services/datasetService';
+import { BasemapType } from '../../types/map';
 
 // Controller to sync map center & zoom from Zustand store and trigger invalidateSize
 const MapStateSync: React.FC = () => {
@@ -24,13 +25,20 @@ const MapStateSync: React.FC = () => {
   }, [mapCenter, zoom, map]);
 
   useEffect(() => {
-    // Invalidate map size on mount and after layout transitions
+    // Invalidate map size on mount, after layout transitions, and on window resize
     map.invalidateSize();
     const t1 = setTimeout(() => map.invalidateSize(), 150);
     const t2 = setTimeout(() => map.invalidateSize(), 400);
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
+      window.removeEventListener('resize', handleResize);
     };
   }, [map]);
 
@@ -45,10 +53,17 @@ export const WebmapViewer: React.FC = () => {
   const [basemapOpen, setBasemapOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
 
-  const { basemap, activeLayers, addLayer } = useMapStore();
+  const { basemap, activeLayers, addLayer, setBasemap } = useMapStore();
 
-  // Deep linking: ?addLayer=datasetId OR ?layerId=datasetId
+  // Deep linking: ?addLayer=datasetId OR ?layerId=datasetId, ?basemap=dark|satellite|topo|osm
   const layerParam = searchParams.get('addLayer') || searchParams.get('layerId');
+  const basemapParam = searchParams.get('basemap') as BasemapType | null;
+
+  useEffect(() => {
+    if (basemapParam && ['osm', 'satellite', 'topo', 'dark'].includes(basemapParam)) {
+      setBasemap(basemapParam);
+    }
+  }, [basemapParam, setBasemap]);
 
   useEffect(() => {
     if (!layerParam) return;
@@ -93,7 +108,7 @@ export const WebmapViewer: React.FC = () => {
   }, [layerParam, addLayer]);
 
   return (
-    <div className="relative w-full h-[calc(100vh-144px)] min-h-[580px] overflow-hidden bg-slate-900">
+    <div className="relative w-full h-[calc(100vh-144px)] md:h-[calc(100vh-72px)] min-h-[580px] md:min-h-[640px] overflow-hidden bg-slate-900 select-none">
       {/* Leaflet Map Canvas */}
       <MapContainer
         center={[-2.5489, 118.0149]}
@@ -167,7 +182,7 @@ export const WebmapViewer: React.FC = () => {
         />
       </MapContainer>
 
-      {/* Layer Manager Drawer */}
+      {/* Layer Manager Drawer / Desktop Side Panel */}
       <LayerManagerDrawer
         isOpenControlled={layerManagerOpen}
         onCloseControlled={() => setLayerManagerOpen(false)}

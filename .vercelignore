@@ -1,0 +1,39 @@
+# ==========================================================================
+# INA-GEOPORTAL WEB APP REDESIGN v2.0 — Vercel Deployment Ignore
+# ==========================================================================
+# Ensures Vercel Serverless Function bundle stays strictly under the
+# 50 MB (zipped) / 250 MB (unzipped) platform limits.
+# National geospatial archives are served directly from Cloudflare R2.
+# ==========================================================================
+
+# 1. Heavy Geospatial Data Archives & Chunks (Stored on Cloudflare R2)
+server/src/fixtures/geojson/*_548.json
+server/src/fixtures/geojson/*_full.json
+server/src/fixtures/geojson/chunks_batas/
+server/src/fixtures/geojson/chunks_gempa/
+server/src/fixtures/geojson/tutupan_lahan_partitions/
+server/dist/fixtures/geojson/*_548.json
+server/dist/fixtures/geojson/*_full.json
+server/dist/fixtures/geojson/chunks_batas/
+server/dist/fixtures/geojson/chunks_gempa/
+server/dist/fixtures/geojson/tutupan_lahan_partitions/
+*.r2_migration_checkpoint.json
+
+# 2. Local SQLite Databases & Raw File Backups
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+server/prisma/dev.db
+server/prisma/server/
+
+# 3. Development Tools, Tests, and Documentation Reports
+.git
+.github
+coverage/
+test-results/
+playwright-report/
+docs/visual-validation/
+PHASE_*.md
+*.log

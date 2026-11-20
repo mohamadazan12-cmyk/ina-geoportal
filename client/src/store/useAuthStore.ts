@@ -12,8 +12,16 @@ interface AuthStore {
 
   login: (email: string, password: string) => Promise<boolean>;
   loginWithGoogle: (credential: string) => Promise<boolean>;
-  register: (data: { name: string; email: string; password: string; institution?: string }) => Promise<boolean>;
+  register: (data: {
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword?: string;
+    agreeTerms?: boolean;
+    institution?: string;
+  }) => Promise<boolean>;
   logout: () => void;
+  updateUser: (updatedUser: User) => void;
   checkAuth: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -49,11 +57,28 @@ const safeStorage = {
   },
 };
 
+// Safe cache key for UI hydration — stores non-sensitive profile only (NEVER the JWT)
+const USER_CACHE_KEY = 'ina_geo_user_profile';
+
+// Clean up legacy insecure token storage from previous application versions
+safeStorage.removeItem('ina_geo_token');
+
+const getInitialCachedUser = (): User | null => {
+  try {
+    const raw = safeStorage.getItem(USER_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const initialUser = getInitialCachedUser();
+
 export const useAuthStore = create<AuthStore>((set, get) => ({
-  user: null,
-  token: safeStorage.getItem('ina_geo_token'),
-  session: null,
-  isAuthenticated: !!safeStorage.getItem('ina_geo_token'),
+  user: initialUser,
+  token: null, // Ephemeral in-memory token (browser sessions rely on HttpOnly cookie)
+  session: initialUser ? { token: '', user: initialUser } : null,
+  isAuthenticated: !!initialUser,
   isLoading: false,
   error: null,
 
@@ -61,7 +86,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await authService.login({ email, password });
-      safeStorage.setItem('ina_geo_token', res.token);
+      // Security hardening: store safe profile in localStorage for instant hydration,
+      // but NEVER store the JWT token in frontend storage.
+      safeStorage.setItem(USER_CACHE_KEY, JSON.stringify(res.user));
+      safeStorage.removeItem('ina_geo_token'); // Ensure legacy token is purged
       set({
         token: res.token,
         user: res.user,
@@ -84,7 +112,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await authService.googleLogin(credential);
-      safeStorage.setItem('ina_geo_token', res.token);
+      safeStorage.setItem(USER_CACHE_KEY, JSON.stringify(res.user));
+      safeStorage.removeItem('ina_geo_token');
       set({
         token: res.token,
         user: res.user,
@@ -107,7 +136,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await authService.register(data);
-      safeStorage.setItem('ina_geo_token', res.token);
+      safeStorage.setItem(USER_CACHE_KEY, JSON.stringify(res.user));
+      safeStorage.removeItem('ina_geo_token');
       set({
         token: res.token,
         user: res.user,
@@ -126,7 +156,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   logout: () => {
+    safeStorage.removeItem(USER_CACHE_KEY);
     safeStorage.removeItem('ina_geo_token');
+    authService.logout();
     set({
       user: null,
       token: null,
@@ -136,22 +168,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     });
   },
 
+  updateUser: (updatedUser: User) => {
+    safeStorage.setItem(USER_CACHE_KEY, JSON.stringify(updatedUser));
+    set((state) => ({
+      user: updatedUser,
+      session: state.token ? { token: state.token, user: updatedUser } : { token: '', user: updatedUser },
+    }));
+  },
+
   checkAuth: async () => {
-    const token = safeStorage.getItem('ina_geo_token');
-    if (!token) {
-      set({ isAuthenticated: false, user: null });
-      return;
-    }
     set({ isLoading: true });
     try {
+      // Calls /auth/me with HttpOnly cookie automatically
       const user = await authService.getMe();
+      safeStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
       set({
         user,
-        session: { token, user },
+        session: { token: '', user },
         isAuthenticated: true,
         isLoading: false,
       });
     } catch {
+      safeStorage.removeItem(USER_CACHE_KEY);
       safeStorage.removeItem('ina_geo_token');
       set({
         user: null,

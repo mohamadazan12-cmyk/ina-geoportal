@@ -25,7 +25,8 @@ export interface DownloadRecord {
   dataset: Dataset;
   format: string;
   purpose: string;
-  status: 'COMPLETED' | 'APPROVED' | 'PENDING';
+  status: 'COMPLETED' | 'APPROVED' | 'PENDING' | 'REDIRECTED' | 'REQUESTED' | 'FAILED';
+  storageSource?: string;
   downloadedAt: string;
 }
 

@@ -44,9 +44,20 @@ export const datasetService = {
     return res.data || [];
   },
 
-  async getDatasetGeoJSON(id: string): Promise<any> {
+  async getDatasetGeoJSON(
+    id: string,
+    options: { full?: boolean; scope?: string; bbox?: number[]; page?: number; limit?: number } = {}
+  ): Promise<any> {
     try {
-      const res: any = await apiClient.get(`/datasets/${id}/geojson`);
+      const params = new URLSearchParams();
+      if (options.full) params.set('full', 'true');
+      if (options.scope) params.set('scope', options.scope);
+      if (options.bbox) params.set('bbox', options.bbox.join(','));
+      if (options.page) params.set('page', String(options.page));
+      if (options.limit) params.set('limit', String(options.limit));
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+
+      const res: any = await apiClient.get(`/datasets/${id}/geojson${queryString}`);
       return res;
     } catch (error) {
       // Offline / fallback: check verified real fixtures first, then demo
@@ -63,6 +74,11 @@ export const datasetService = {
 
   async requestDownload(id: string, payload: { format: string; purpose?: string }): Promise<any> {
     const res: any = await apiClient.post(`/datasets/${id}/download`, payload);
+    return res.data;
+  },
+
+  async getStorageStatus(): Promise<any> {
+    const res: any = await apiClient.get('/storage/status');
     return res.data;
   },
 };

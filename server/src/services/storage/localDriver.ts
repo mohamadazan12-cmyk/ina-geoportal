@@ -10,6 +10,7 @@ import {
   sanitizeStorageKey,
   inferContentType,
 } from './types';
+import { canonicalToLocalFixture } from './canonicalKeys';
 
 /**
  * Filesystem-backed driver — development and test environments only.
@@ -28,17 +29,29 @@ export class LocalStorageDriver implements StorageDriver {
 
   private resolve(key: string): string {
     const safeKey = sanitizeStorageKey(key);
-    const absolute = path.resolve(this.rootDir, safeKey);
+    const localRel = canonicalToLocalFixture(safeKey);
+
+    let candidate = path.resolve(this.rootDir, localRel);
+    if (!fs.existsSync(candidate)) {
+      candidate = path.resolve(this.rootDir, safeKey);
+    }
+    if (!fs.existsSync(candidate)) {
+      const geojsonCandidate = path.resolve(this.rootDir, 'geojson', path.basename(safeKey));
+      if (fs.existsSync(geojsonCandidate)) {
+        candidate = geojsonCandidate;
+      }
+    }
+
     const rootResolved = path.resolve(this.rootDir);
 
     // Defence in depth: never allow escaping the configured root.
-    if (absolute !== rootResolved && !absolute.startsWith(rootResolved + path.sep)) {
+    if (candidate !== rootResolved && !candidate.startsWith(rootResolved + path.sep)) {
       throw new StorageConfigurationError(
         'Upaya akses berkas di luar direktori penyimpanan ditolak.',
         `key=${safeKey}`
       );
     }
-    return absolute;
+    return candidate;
   }
 
   async exists(key: string): Promise<boolean> {
@@ -83,12 +96,15 @@ export class LocalStorageDriver implements StorageDriver {
     return buffer.toString('utf-8');
   }
 
-  async createReadStream(key: string): Promise<Readable> {
+  async createReadStream(key: string, range?: { start?: number; end?: number }): Promise<Readable> {
     const absolute = this.resolve(key);
     if (!fs.existsSync(absolute)) {
       throw new StorageObjectNotFoundError(sanitizeStorageKey(key), this.scope);
     }
-    return fs.createReadStream(absolute);
+    const options: { start?: number; end?: number } = {};
+    if (range?.start !== undefined) options.start = range.start;
+    if (range?.end !== undefined) options.end = range.end;
+    return fs.createReadStream(absolute, options);
   }
 
   async upload(key: string, data: Buffer | string, contentType?: string): Promise<StoredFileMeta> {

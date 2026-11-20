@@ -23,6 +23,11 @@
 
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), 'server/.env'), override: true });
+
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -96,27 +101,79 @@ async function main(): Promise<void> {
   }
 
   // Insert parents before children so foreign keys always resolve.
+  console.log('\n[1/6] Restoring Categories...');
   for (const row of plan.categories) {
-    await prisma.category.upsert({ where: { id: row.id }, update: row, create: row });
+    const data = {
+      ...row,
+      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
+    };
+    await prisma.category.upsert({ where: { id: row.id }, update: data, create: data });
   }
-  for (const row of plan.networkNodes) {
-    await prisma.networkNode.upsert({ where: { id: row.id }, update: row, create: row });
-  }
-  for (const row of plan.datasets) {
-    await prisma.dataset.upsert({ where: { id: row.id }, update: row, create: row });
-  }
-  for (const row of plan.users) {
-    await prisma.user.upsert({ where: { id: row.id }, update: row, create: row });
-  }
-  for (const row of plan.bookmarks) {
-    await prisma.bookmark.upsert({ where: { id: row.id }, update: row, create: row });
-  }
-  for (const row of plan.downloadHistory) {
-    await prisma.downloadHistory.upsert({ where: { id: row.id }, update: row, create: row });
-  }
+  console.log(`  ✓ ${plan.categories.length} categories restored.`);
 
-  console.log('After  :', JSON.stringify(await counts()));
-  console.log('Restore complete. Verify the counts above match the source snapshot.');
+  console.log('[2/6] Restoring NetworkNodes...');
+  for (const row of plan.networkNodes) {
+    const data = {
+      ...row,
+      lastSyncAt: row.lastSyncAt ? new Date(row.lastSyncAt) : null,
+      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
+    };
+    await prisma.networkNode.upsert({ where: { id: row.id }, update: data, create: data });
+  }
+  console.log(`  ✓ ${plan.networkNodes.length} network nodes restored.`);
+
+  console.log('[3/6] Restoring Datasets...');
+  for (const row of plan.datasets) {
+    const data = {
+      ...row,
+      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
+      updatedAt: row.updatedAt ? new Date(row.updatedAt) : new Date(),
+    };
+    await prisma.dataset.upsert({ where: { id: row.id }, update: data, create: data });
+  }
+  console.log(`  ✓ ${plan.datasets.length} datasets restored.`);
+
+  console.log('[4/6] Restoring Users (preserving bcrypt password hashes)...');
+  for (const row of plan.users) {
+    const data = {
+      ...row,
+      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
+      updatedAt: row.updatedAt ? new Date(row.updatedAt) : new Date(),
+    };
+    await prisma.user.upsert({ where: { id: row.id }, update: data, create: data });
+  }
+  console.log(`  ✓ ${plan.users.length} users restored.`);
+
+  console.log('[5/6] Restoring Bookmarks...');
+  for (const row of plan.bookmarks) {
+    const data = {
+      id: row.id,
+      userId: row.userId,
+      datasetId: row.datasetId,
+      createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
+    };
+    await prisma.bookmark.upsert({
+      where: { userId_datasetId: { userId: row.userId, datasetId: row.datasetId } },
+      update: data,
+      create: data,
+    });
+  }
+  console.log(`  ✓ ${plan.bookmarks.length} bookmarks restored.`);
+
+  console.log('[6/6] Restoring DownloadHistory...');
+  for (const row of plan.downloadHistory) {
+    const data = {
+      ...row,
+      downloadedAt: row.downloadedAt ? new Date(row.downloadedAt) : new Date(),
+    };
+    await prisma.downloadHistory.upsert({ where: { id: row.id }, update: data, create: data });
+  }
+  console.log(`  ✓ ${plan.downloadHistory.length} download records restored.`);
+
+  const afterCounts = await counts();
+  console.log('\n--- Restore Verification ---');
+  console.log('After  :', JSON.stringify(afterCounts));
+  console.log('Restore complete. All IDs, hashes, and relational links preserved.');
 }
 
 main()

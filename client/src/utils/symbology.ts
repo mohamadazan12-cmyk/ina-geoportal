@@ -162,7 +162,9 @@ export function getFeatureStyle(layerId: string, feature: any, baseOpacity: numb
 
   switch (layerId) {
     case 'ds-rawan-gempa': {
-      const kerawanan = String(props.TINGKAT_KERAWANAN || props.ZONA_BAHAYA || '').toLowerCase();
+      const kerawanan = String(
+        props.TINGKAT_KERAWANAN || props.ZONA_BAHAYA || props.kelas || props.KELAS || ''
+      ).toLowerCase();
       if (kerawanan.includes('sangat tinggi') || kerawanan.includes('sesar aktif')) {
         return {
           color: '#dc2626',
@@ -191,15 +193,17 @@ export function getFeatureStyle(layerId: string, feature: any, baseOpacity: numb
     }
 
     case 'ds-jalan-nasional': {
-      const status = String(props.STATUS || props.NAMA_RUAS || '').toLowerCase();
-      if (status.includes('arteri primer') || status.includes('pantura')) {
+      const status = String(
+        props.STATUS || props.NAMA_RUAS || props.nm_inf || props.fungsi || ''
+      ).toLowerCase();
+      if (status.includes('arteri primer') || status.includes('pantura') || status === 'a' || status.includes('arteri')) {
         return {
           color: '#ea580c',
           weight: 4,
           opacity: baseOpacity,
         };
       }
-      if (status.includes('kolektor') || status.includes('tengah')) {
+      if (status.includes('kolektor') || status.includes('tengah') || status === 'k') {
         return {
           color: '#f59e0b',
           weight: 3,

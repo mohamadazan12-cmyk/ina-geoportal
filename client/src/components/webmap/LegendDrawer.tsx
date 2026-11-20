@@ -66,7 +66,7 @@ export const LegendDrawer: React.FC<LegendDrawerProps> = ({
   };
 
   return (
-    <div className="absolute bottom-3 left-3 right-3 z-[450] max-w-[390px] mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-slideUp">
+    <div className="absolute bottom-3 left-3 right-3 max-w-[390px] mx-auto md:bottom-6 md:left-6 md:right-auto md:w-96 md:max-w-none md:mx-0 z-[450] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-slideUp">
       {/* Header */}
       <div className="px-4 py-3 bg-[#0C1D36] text-white flex items-center justify-between">
         <div className="flex items-center gap-2">

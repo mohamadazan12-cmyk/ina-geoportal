@@ -54,7 +54,7 @@ export const LayerManagerDrawer: React.FC<LayerManagerDrawerProps> = ({
   }
 
   return (
-    <div className="absolute top-16 left-3 right-3 max-w-[380px] mx-auto z-[450] animate-fadeIn">
+    <div className="absolute top-16 left-3 right-3 max-w-[380px] mx-auto md:top-20 md:left-6 md:right-auto md:w-96 md:max-w-none md:mx-0 z-[450] animate-fadeIn">
       <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="px-4 py-3 bg-[#0C1D36] text-white flex items-center justify-between">

@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/db';
+import { config } from '../config';
 import { sendSuccess, sendError } from '../utils/responseFormatter';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { realGeospatialService } from '../services/realGeospatialService';
-import { getStorageDriver } from '../services/storage';
+import { getStorageDriver, toCanonicalKey } from '../services/storage';
 import { verifyToken } from '../utils/jwt';
 
 export async function getDatasets(req: Request, res: Response): Promise<void> {
@@ -71,9 +72,22 @@ export async function getDatasets(req: Request, res: Response): Promise<void> {
       },
     });
 
+    const enrichedDatasets = datasets.map((d) => {
+      const publicDownloadUrl = realGeospatialService.getPublicDownloadUrl(d.id);
+      const canonicalKey = toCanonicalKey(`${d.id}.json`);
+      const r2PublicUrl = config.r2PublicUrl ? `${config.r2PublicUrl}/${canonicalKey}` : publicDownloadUrl;
+      return {
+        ...d,
+        publicDownloadUrl,
+        remoteKey: canonicalKey,
+        r2PublicUrl,
+        storageSource: config.storageDriver,
+      };
+    });
+
     sendSuccess(
       res,
-      datasets,
+      enrichedDatasets,
       'Data katalog berhasil dimuat',
       {
         page,
@@ -104,7 +118,21 @@ export async function getDatasetById(req: Request, res: Response): Promise<void>
       return;
     }
 
-    sendSuccess(res, dataset, 'Detail dataset berhasil dimuat');
+    const publicDownloadUrl = realGeospatialService.getPublicDownloadUrl(id);
+    const canonicalKey = toCanonicalKey(`${id}.json`);
+    const r2PublicUrl = config.r2PublicUrl ? `${config.r2PublicUrl}/${canonicalKey}` : publicDownloadUrl;
+
+    sendSuccess(
+      res,
+      {
+        ...dataset,
+        publicDownloadUrl,
+        remoteKey: canonicalKey,
+        r2PublicUrl,
+        storageSource: config.storageDriver,
+      },
+      'Detail dataset berhasil dimuat'
+    );
   } catch (error: any) {
     sendError(res, 'DATASET_DETAIL_ERROR', error.message || 'Gagal memuat detail dataset', 500);
   }
@@ -137,6 +165,8 @@ export async function getDatasetGeoJSON(req: Request, res: Response): Promise<vo
     const preferDemo = req.query.demo === 'true';
     const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+    const scope = req.query.scope as string | undefined;
+    const full = req.query.full === 'true';
 
     let bbox: [number, number, number, number] | undefined = undefined;
     if (req.query.bbox && typeof req.query.bbox === 'string') {
@@ -147,7 +177,15 @@ export async function getDatasetGeoJSON(req: Request, res: Response): Promise<vo
     }
 
     try {
-      const geoResult = await realGeospatialService.getDatasetGeoJSON(id, preferDemo, page, limit, bbox);
+      const geoResult = await realGeospatialService.getDatasetGeoJSON(
+        id,
+        preferDemo,
+        page,
+        limit,
+        bbox,
+        scope,
+        full
+      );
       res.setHeader('Content-Type', 'application/geo+json');
       res.setHeader('X-Data-Source', geoResult.dataSourceStatus);
       res.setHeader('X-Is-Demo', String(geoResult.isDemo));
@@ -163,6 +201,25 @@ export async function getDatasetGeoJSON(req: Request, res: Response): Promise<vo
       if (bbox) {
         res.setHeader('X-Filter-Bbox', bbox.join(','));
       }
+      if (geoResult.storageDriver) {
+        res.setHeader('X-Storage-Driver', geoResult.storageDriver);
+      }
+      if (geoResult.storageSource) {
+        res.setHeader('X-Storage-Source', geoResult.storageSource);
+        if (geoResult.storageSource === 'local-fallback') {
+          res.setHeader('X-Storage-Fallback', 'true');
+        }
+      }
+      if (geoResult.canonicalKey) {
+        res.setHeader('X-Canonical-Key', geoResult.canonicalKey);
+      }
+      if (geoResult.publicUrl) {
+        res.setHeader('X-Public-Url', geoResult.publicUrl);
+      }
+      res.setHeader(
+        'Access-Control-Expose-Headers',
+        'X-Data-Source, X-Is-Demo, X-Source-Agency, X-Feature-Count, X-Total-Count, X-Page, X-Total-Pages, X-Filter-Bbox, X-Storage-Driver, X-Storage-Source, X-Storage-Fallback, X-Canonical-Key, X-Public-Url'
+      );
       res.json(geoResult.data);
     } catch (err: any) {
       sendError(res, 'GEOJSON_NOT_FOUND', err.message || `Data GeoJSON untuk '${id}' tidak ditemukan.`, 404);
@@ -221,13 +278,15 @@ export async function requestDownload(req: AuthenticatedRequest, res: Response):
     }
 
     // Record download history for authenticated user
-    await prisma.downloadHistory.create({
+    const status = dataset.accessType === 'restricted' ? 'APPROVED' : 'REDIRECTED';
+
+    const historyRecord = await prisma.downloadHistory.create({
       data: {
         userId: req.user.userId,
         datasetId: dataset.id,
         format: format.toLowerCase(),
-        purpose: purpose.trim(),
-        status: dataset.accessType === 'restricted' ? 'APPROVED' : 'COMPLETED',
+        purpose: purpose.trim() || 'Unduh Berkas Geospasial',
+        status,
       },
     });
 
@@ -242,14 +301,25 @@ export async function requestDownload(req: AuthenticatedRequest, res: Response):
     const clientToken = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : '';
     const downloadUrl = `/api/v1/datasets/${dataset.id}/download-file?format=${encodeURIComponent(format.toLowerCase())}${clientToken ? `&token=${encodeURIComponent(clientToken)}` : ''}`;
 
+    // Resolve canonical R2 download URL
+    const fileInfo = await realGeospatialService.getDownloadFilePath(id, true);
+    const r2PublicBase = config.r2PublicUrl || 'https://pub-9dc737b540c54b5597b47a06cbbda81e.r2.dev';
+    const canonicalKey = toCanonicalKey(fileInfo.key);
+    const r2PublicUrl = `${r2PublicBase}/${canonicalKey}`;
+
     sendSuccess(
       res,
       {
+        historyId: historyRecord.id,
         datasetId: dataset.id,
         title: dataset.title,
         format: format.toLowerCase(),
         accessType: dataset.accessType,
-        status: dataset.accessType === 'restricted' ? 'APPROVED' : 'COMPLETED',
+        status,
+        storageSource: 'Cloudflare R2',
+        canonicalKey,
+        publicUrl: r2PublicUrl,
+        r2PublicUrl,
         downloadUrl,
         expiresInSeconds: 3600,
       },

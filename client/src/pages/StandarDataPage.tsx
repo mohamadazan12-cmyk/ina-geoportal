@@ -78,44 +78,24 @@ const STANDAR_DOCS_DATA: StandarDoc[] = [
     title: 'Spesifikasi Informasi Geospasial Gelombang Laut BMKG',
     category: 'prioritas',
     year: 2024,
-    publisher: 'Badan Meteorologi, Klimatologi, dan Geofisika',
-    description: 'Standar format model numerik oseanografi, data tinggi gelombang signifikan, periode gelombang, dan diseminasi format NetCDF/WMS.',
+    publisher: 'Badan Meteorologi Klimatologi dan Geofisika',
+    description: 'Standar format data model numerik gelombang perairan Indonesia, ketinggian signifikan, arah rambat, dan periode gelombang.',
     pages: 54,
   },
   {
     id: 'sdg-05',
-    code: 'SDG-05/BMKG/2024',
-    title: 'Standar Data Angin Permukaan Laut Perairan Nusantara',
+    code: 'SDG-05/KLHK/2023',
+    title: 'Standar Data Kawasan Konservasi Keanekaragaman Hayati',
     category: 'prioritas',
-    year: 2024,
-    publisher: 'BMKG & Pusat Jaring Kontrol Geodesi BIG',
-    description: 'Format data vektor arah dan kecepatan angin rata-rata harian pada ketinggian 10 meter untuk keselamatan pelayaran nasional.',
-    pages: 42,
-  },
-  {
-    id: 'sdg-06',
-    code: 'SDG-06/BNPB/2024',
-    title: 'Spesifikasi Penyajian Peta Rawan Bencana Longsor Skala 1:25.000',
-    category: 'prioritas',
-    year: 2024,
-    publisher: 'BNPB & Badan Informasi Geospasial',
-    description: 'Klasifikasi indeks kerentanan gerakan tanah berdasarkan curah hujan ekstrem, kemiringan lereng, dan geologi formasi batuan.',
+    year: 2023,
+    publisher: 'Kementerian LHK Ditjen KSDAE',
+    description: 'Standarisasi polygon cagar alam, suaka margasatwa, taman nasional, dan koridor jelajah satwa prioritas nasional.',
     pages: 70,
   },
   {
-    id: 'sdg-07',
-    code: 'SDG-07/KLHK/2023',
-    title: 'Standar Batas Kawasan Hutan Konservasi & Suaka Margasatwa',
-    category: 'prioritas',
-    year: 2023,
-    publisher: 'Kementerian Lingkungan Hidup dan Kehutanan',
-    description: 'Spesifikasi penetapan batas definitif kawasan konservasi darat dan perairan berdasarkan berita acara tata batas.',
-    pages: 58,
-  },
-  {
-    id: 'sdg-08',
-    code: 'SDG-08/PUPR/2023',
-    title: 'Spesifikasi Teknis Basis Data Jaringan Irigasi Primer dan Sekunder',
+    id: 'sdg-06',
+    code: 'SDG-06/PUPR/2023',
+    title: 'Spesifikasi Geodatabase Jaringan Irigasi Primer dan Sekunder',
     category: 'non-prioritas',
     year: 2023,
     publisher: 'Kementerian PUPR Direktorat SDA',
@@ -179,201 +159,207 @@ export const StandarDataPage: React.FC = () => {
   });
 
   return (
-    <div className="w-full flex flex-col px-5 pt-4 pb-8 select-none">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 select-none flex flex-col">
       {/* 1. Header with Back button and Title (exact Figma 160:2213) */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3.5 mb-4 md:mb-6">
         <button
           type="button"
           onClick={() => navigate('/lainnya')}
           aria-label="Kembali ke menu Lainnya"
-          className="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:text-[#1A3BAF] active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-700 hover:text-[#1A3BAF] active:scale-95 transition-transform"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-[#1E1E1E] tracking-tight">
+          <h1 className="text-xl md:text-3xl font-bold text-[#1E1E1E] tracking-tight">
             Standar Data Geospasial
           </h1>
-          <span className="text-[11px] text-[#717171]">
-            Katalog Standarisasi Nasional JIGN
+          <span className="text-xs md:text-sm text-[#717171]">
+            Katalog Dokumen Standarisasi & Spesifikasi Teknis JIGN
           </span>
         </div>
       </div>
 
-      {/* 2. Search Input Bar (exact Figma 160:2215 Frame 50) */}
-      <div className="relative w-full mb-3">
-        <div className="w-full h-11 bg-white rounded-lg border border-slate-200 flex items-center px-3.5 shadow-sm focus-within:ring-2 focus-within:ring-[#1A3BAF]">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari standar data, kode SNI, atau tema..."
-            className="flex-1 bg-transparent text-xs text-[#1E1E1E] placeholder-[#717171] outline-none pr-2"
-          />
-          {searchQuery ? (
+      {/* 2. Controls & Search Row */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-4 md:mb-6">
+        {/* Search Input Bar (exact Figma 160:2215 Frame 50) */}
+        <div className="relative flex-1 max-w-2xl">
+          <div className="w-full h-11 md:h-12 bg-white rounded-xl border border-slate-200 flex items-center px-4 shadow-xs focus-within:ring-2 focus-within:ring-[#1A3BAF] transition-all">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari standar data, kode SNI, atau tema..."
+              className="flex-1 bg-transparent text-xs md:text-sm text-[#1E1E1E] placeholder-[#717171] outline-none pr-2"
+            />
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <Search className="w-4 h-4 md:w-5 md:h-5 text-[#1A3BAF]" />
+            )}
+          </div>
+        </div>
+
+        {/* View Mode & Sort Controls */}
+        <div className="flex items-center justify-between md:justify-end gap-3">
+          <span className="text-xs font-semibold text-[#1E1E1E]">
+            {filteredDocs.length} Dokumen
+          </span>
+
+          <div className="flex items-center gap-1.5">
+            {/* Sort button */}
             <button
-              onClick={() => setSearchQuery('')}
-              className="text-slate-400 hover:text-slate-600 p-1"
+              type="button"
+              onClick={() => setSortAsc(!sortAsc)}
+              aria-label="Urutkan dokumen"
+              title="Urutkan Dokumen"
+              className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:text-[#1A3BAF] shadow-xs active:scale-95 transition-all"
             >
-              <X className="w-4 h-4" />
+              <ArrowUpDown className="w-4 h-4" />
             </button>
-          ) : (
-            <Search className="w-4 h-4 text-[#1A3BAF]" />
-          )}
+
+            {/* List View Toggle */}
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              aria-label="Tampilan List"
+              className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-colors shadow-xs active:scale-95 ${
+                viewMode === 'list'
+                  ? 'bg-[#1A3BAF] text-white border-[#1A3BAF]'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+
+            {/* Grid View Toggle */}
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Tampilan Grid"
+              className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-colors shadow-xs active:scale-95 ${
+                viewMode === 'grid'
+                  ? 'bg-[#1A3BAF] text-white border-[#1A3BAF]'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <Grid className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 3. Category Filter Tabs (exact Figma 160:2226 Group 61) */}
-      <div className="w-full bg-[#D9D9D9] rounded-lg p-1 flex items-center gap-1 mb-3 shadow-inner">
+      <div className="w-full max-w-xl bg-[#D9D9D9] rounded-xl p-1 flex items-center gap-1 mb-6 shadow-inner">
         <button
           type="button"
           onClick={() => setActiveTab('all')}
-          className={`flex-1 h-9 rounded-md text-xs transition-all font-medium flex items-center justify-center ${
+          className={`flex-1 h-9 rounded-lg text-xs md:text-sm transition-all font-medium flex items-center justify-center ${
             activeTab === 'all'
-              ? 'bg-white text-[#1A3BAF] font-semibold shadow-sm'
+              ? 'bg-white text-[#1A3BAF] font-bold shadow-xs'
               : 'text-[#1E1E1E] hover:text-[#1A3BAF]'
           }`}
         >
-          Semua (60)
+          Semua ({apiDocs.length})
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('prioritas')}
-          className={`flex-1 h-9 rounded-md text-xs transition-all font-medium flex items-center justify-center ${
+          className={`flex-1 h-9 rounded-lg text-xs md:text-sm transition-all font-medium flex items-center justify-center ${
             activeTab === 'prioritas'
-              ? 'bg-white text-[#1A3BAF] font-semibold shadow-sm'
+              ? 'bg-white text-[#1A3BAF] font-bold shadow-xs'
               : 'text-[#1E1E1E] hover:text-[#1A3BAF]'
           }`}
         >
-          Data Prioritas (50)
+          Data Prioritas
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('non-prioritas')}
-          className={`flex-1 h-9 rounded-md text-xs transition-all font-medium flex items-center justify-center ${
+          className={`flex-1 h-9 rounded-lg text-xs md:text-sm transition-all font-medium flex items-center justify-center ${
             activeTab === 'non-prioritas'
-              ? 'bg-white text-[#1A3BAF] font-semibold shadow-sm'
+              ? 'bg-white text-[#1A3BAF] font-bold shadow-xs'
               : 'text-[#1E1E1E] hover:text-[#1A3BAF]'
           }`}
         >
-          Non Prioritas (10)
+          Non Prioritas
         </button>
       </div>
 
-      {/* 4. Controls Bar (Document Counter + Sort + Grid/List View Toggles) */}
-      <div className="flex items-center justify-between mb-3 px-1">
-        <span className="text-xs font-semibold text-[#1E1E1E]">
-          {filteredDocs.length} Dokumen Ditemukan
-        </span>
-
-        <div className="flex items-center gap-1.5">
-          {/* Sort button */}
-          <button
-            type="button"
-            onClick={() => setSortAsc(!sortAsc)}
-            aria-label="Urutkan dokumen"
-            title="Urutkan Dokumen"
-            className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:text-[#1A3BAF] shadow-sm"
-          >
-            <ArrowUpDown className="w-4 h-4" />
-          </button>
-
-          {/* List View Toggle */}
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            aria-label="Tampilan List"
-            className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors shadow-sm ${
-              viewMode === 'list'
-                ? 'bg-[#1A3BAF] text-white border-[#1A3BAF]'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <List className="w-4 h-4" />
-          </button>
-
-          {/* Grid View Toggle */}
-          <button
-            type="button"
-            onClick={() => setViewMode('grid')}
-            aria-label="Tampilan Grid"
-            className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors shadow-sm ${
-              viewMode === 'grid'
-                ? 'bg-[#1A3BAF] text-white border-[#1A3BAF]'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Grid className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* 5. Document List / Grid (exact Figma 160:1987 & 166:2690) */}
+      {/* 4. Document List / Grid */}
       {filteredDocs.length === 0 ? (
-        <div className="bg-white rounded-lg p-8 text-center border border-slate-200 my-4">
-          <Search className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="font-semibold text-sm text-[#1E1E1E]">Dokumen Tidak Ditemukan</p>
+        <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 my-4 shadow-xs">
+          <Search className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+          <p className="font-bold text-base text-[#1E1E1E]">Dokumen Tidak Ditemukan</p>
           <p className="text-xs text-[#717171] mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
         </div>
       ) : viewMode === 'grid' ? (
-        /* GRID VIEW (exact Figma 160:1987) */
-        <div className="space-y-4">
+        /* GRID VIEW (exact Figma 160:1987, responsive for desktop) */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredDocs.map((doc: StandarDoc, idx: number) => {
             const previewImg = PREVIEW_IMAGES[idx % PREVIEW_IMAGES.length];
             return (
               <div
                 key={doc.id}
-                className="w-full bg-white rounded-lg p-3.5 shadow-sm border border-slate-100 flex flex-col gap-3 transition-all hover:shadow-md"
+                className="w-full bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col justify-between gap-3 transition-all hover:shadow-md hover:border-[#1A3BAF]/30"
               >
-                {/* Preview Thumbnail */}
-                <div className="relative w-full h-[140px] rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
-                  <img
-                    src={previewImg}
-                    alt={doc.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Badge overlays */}
-                  <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
-                    <span className="bg-white/90 backdrop-blur-sm text-[#1A3BAF] font-bold text-[10px] px-2 py-0.5 rounded-full border border-blue-200">
-                      DOKUMEN
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        doc.category === 'prioritas'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : 'bg-amber-100 text-amber-800 border border-amber-300'
-                      }`}
-                    >
-                      {doc.category === 'prioritas' ? 'PRIORITAS' : 'NON PRIORITAS'}
-                    </span>
-                    <span className="bg-slate-900/70 text-white text-[10px] px-2 py-0.5 rounded-full">
+                <div>
+                  {/* Preview Thumbnail */}
+                  <div className="relative w-full h-[140px] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mb-3">
+                    <img
+                      src={previewImg}
+                      alt={doc.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Badge overlays */}
+                    <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+                      <span className="bg-white/95 backdrop-blur-sm text-[#1A3BAF] font-bold text-[10px] px-2 py-0.5 rounded-full border border-blue-200">
+                        SNI / JIGN
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          doc.category === 'prioritas'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-amber-100 text-amber-800 border border-amber-300'
+                        }`}
+                      >
+                        {doc.category === 'prioritas' ? 'PRIORITAS' : 'NON'}
+                      </span>
+                    </div>
+
+                    <span className="absolute bottom-2 right-2 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-mono">
                       {doc.year}
                     </span>
                   </div>
+
+                  {/* Title & Description */}
+                  <div>
+                    <span className="text-[11px] font-mono font-bold text-[#1A3BAF] block">
+                      {doc.code}
+                    </span>
+                    <h3 className="font-bold text-sm text-[#1E1E1E] leading-snug mt-1 line-clamp-2">
+                      {doc.title}
+                    </h3>
+                    <p className="text-xs text-[#717171] line-clamp-2 mt-1.5 leading-relaxed">
+                      {doc.description}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Title & Description */}
-                <div>
-                  <span className="text-[11px] font-mono font-semibold text-[#1A3BAF]">
-                    {doc.code}
-                  </span>
-                  <h3 className="font-semibold text-base text-[#1E1E1E] leading-snug mt-0.5">
-                    {doc.title}
-                  </h3>
-                  <p className="text-xs text-[#717171] line-clamp-2 mt-1">
-                    {doc.description}
-                  </p>
-                </div>
-
-                {/* Solid Blue Button \"Lihat Detail ↗\" (exact Figma Frame 50) */}
+                {/* Solid Blue Button "Lihat Detail" */}
                 <button
                   type="button"
                   onClick={() => setSelectedDoc(doc)}
-                  className="w-full h-[44px] bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all"
+                  className="w-full h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-all mt-2"
                 >
-                  <span>Lihat Detail</span>
+                  <span>Lihat Detail Standar</span>
                   <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
                 </button>
               </div>
@@ -382,16 +368,16 @@ export const StandarDataPage: React.FC = () => {
         </div>
       ) : (
         /* LIST VIEW (exact Figma 166:2690) */
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {filteredDocs.map((doc: StandarDoc, idx: number) => {
             const previewImg = PREVIEW_IMAGES[idx % PREVIEW_IMAGES.length];
             return (
               <div
                 key={doc.id}
                 onClick={() => setSelectedDoc(doc)}
-                className="w-full bg-white rounded-lg p-3 shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all cursor-pointer active:scale-98"
+                className="w-full bg-white rounded-xl p-3.5 md:p-4 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:shadow-md hover:border-[#1A3BAF]/30 transition-all cursor-pointer active:scale-98"
               >
-                <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-slate-200">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200">
                   <img
                     src={previewImg}
                     alt={doc.title}
@@ -399,9 +385,12 @@ export const StandarDataPage: React.FC = () => {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 mb-0.5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-mono font-bold text-[#1A3BAF]">
+                      {doc.code}
+                    </span>
                     <span
-                      className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                         doc.category === 'prioritas'
                           ? 'bg-emerald-100 text-emerald-800'
                           : 'bg-amber-100 text-amber-800'
@@ -413,14 +402,14 @@ export const StandarDataPage: React.FC = () => {
                       {doc.year}
                     </span>
                   </div>
-                  <h4 className="font-semibold text-xs text-[#1E1E1E] leading-snug truncate">
+                  <h4 className="font-bold text-xs md:text-sm text-[#1E1E1E] leading-snug truncate">
                     {doc.title}
                   </h4>
-                  <p className="text-[10px] text-[#717171] truncate mt-0.5">
-                    {doc.code} • {doc.pages} Halaman
+                  <p className="text-xs text-[#717171] truncate mt-1">
+                    {doc.publisher} • {doc.pages} Halaman Standar
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-blue-50 text-[#1A3BAF] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1A3BAF] flex items-center justify-center shrink-0">
                   <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
                 </div>
               </div>
@@ -438,6 +427,7 @@ export const StandarDataPage: React.FC = () => {
             setDownloadError(null);
           }}
           title="Detail Dokumen Standar Data"
+          maxWidth="2xl"
         >
           <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
@@ -457,7 +447,7 @@ export const StandarDataPage: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="font-bold text-base text-[#1E1E1E] leading-snug">
+              <h3 className="font-bold text-base md:text-lg text-[#1E1E1E] leading-snug">
                 {selectedDoc.title}
               </h3>
               <p className="text-xs text-[#717171] mt-1">
@@ -465,28 +455,28 @@ export const StandarDataPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                 Deskripsi & Ruang Lingkup Standar
               </h4>
-              <p className="text-xs text-[#1E1E1E] leading-relaxed">
+              <p className="text-xs md:text-sm text-[#1E1E1E] leading-relaxed">
                 {selectedDoc.description}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2 bg-slate-50 rounded border border-slate-100">
-                <span className="text-slate-500 block text-[10px]">Ketebalan Dokumen</span>
-                <span className="font-semibold text-slate-800">{selectedDoc.pages} Halaman Standar</span>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Ketebalan Dokumen</span>
+                <span className="font-bold text-slate-800 text-xs md:text-sm mt-0.5 block">{selectedDoc.pages} Halaman Standar</span>
               </div>
-              <div className="p-2 bg-slate-50 rounded border border-slate-100">
-                <span className="text-slate-500 block text-[10px]">Status Ketersediaan Berkas</span>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Status Ketersediaan Berkas</span>
                 {selectedDoc.isAvailableForDownload ? (
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                  <span className="font-bold text-emerald-600 flex items-center gap-1 text-xs md:text-sm mt-0.5">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Tersedia
                   </span>
                 ) : (
-                  <span className="font-semibold text-amber-700 flex items-center gap-1">
+                  <span className="font-bold text-amber-700 flex items-center gap-1 text-xs md:text-sm mt-0.5">
                     <AlertCircle className="w-3.5 h-3.5" /> Belum Tersedia
                   </span>
                 )}
@@ -495,7 +485,7 @@ export const StandarDataPage: React.FC = () => {
 
             {/* Status Information Box */}
             {selectedDoc.isAvailableForDownload ? (
-              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs flex items-start gap-2.5">
+              <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-emerald-950 block">Berkas Resmi Siap Diunduh</span>
@@ -505,7 +495,7 @@ export const StandarDataPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs flex items-start gap-2.5">
+              <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-amber-950 block">Dokumen belum tersedia untuk diunduh.</span>
@@ -518,7 +508,7 @@ export const StandarDataPage: React.FC = () => {
 
             {/* Authentication Notice if File is Available but User is Anonymous */}
             {selectedDoc.isAvailableForDownload && !isAuthenticated && (
-              <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 text-xs flex items-start gap-2.5">
+              <div className="p-3.5 bg-blue-50 rounded-xl border border-blue-200 text-xs flex items-start gap-2.5">
                 <Lock className="w-4 h-4 text-[#1A3BAF] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-blue-950 block">Login Diperlukan untuk Mengunduh</span>
@@ -536,13 +526,13 @@ export const StandarDataPage: React.FC = () => {
               </div>
             )}
 
-            <div className="pt-2 flex items-center gap-2">
+            <div className="pt-2 flex items-center gap-3">
               {selectedDoc.isAvailableForDownload ? (
                 isAuthenticated ? (
                   <a
                     href={`/api/v1/documents/${selectedDoc.id}/download${token ? `?token=${encodeURIComponent(token)}` : ''}`}
                     download={`${selectedDoc.code.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`}
-                    className="flex-1 h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-lg font-medium text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
+                    className="flex-1 h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     <span>Unduh PDF Lengkap</span>
@@ -553,7 +543,7 @@ export const StandarDataPage: React.FC = () => {
                     onClick={() => {
                       navigate(`/login?returnUrl=/standar-data&downloadDoc=${selectedDoc.id}`);
                     }}
-                    className="flex-1 h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-lg font-medium text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
+                    className="flex-1 h-11 bg-[#1A3BAF] hover:bg-[#153096] text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
                   >
                     <Lock className="w-4 h-4" />
                     <span>Masuk ke Akun untuk Mengunduh</span>
@@ -563,7 +553,7 @@ export const StandarDataPage: React.FC = () => {
                 <button
                   type="button"
                   disabled
-                  className="flex-1 h-11 bg-slate-100 border border-slate-200 text-slate-400 rounded-lg font-medium text-xs flex items-center justify-center gap-2 cursor-not-allowed"
+                  className="flex-1 h-11 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
                 >
                   <AlertCircle className="w-4 h-4" />
                   <span>Dokumen Belum Tersedia untuk Diunduh</span>
@@ -576,7 +566,7 @@ export const StandarDataPage: React.FC = () => {
                   setSelectedDoc(null);
                   setDownloadError(null);
                 }}
-                className="px-4 h-11 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium transition-colors"
+                className="px-5 h-11 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition-colors"
               >
                 Tutup
               </button>

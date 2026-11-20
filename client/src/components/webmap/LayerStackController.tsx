@@ -126,7 +126,9 @@ export const LayerStackController: React.FC<LayerStackControllerProps> = ({ laye
                     const label =
                       feature.properties.NAMOBJ ||
                       feature.properties.WADMKK ||
+                      feature.properties.nm_inf ||
                       feature.properties.NAMA_RUAS ||
+                      feature.properties.kelas ||
                       feature.properties.KAB_KOTA ||
                       feature.properties.NAMA_FASKES ||
                       feature.properties.KLASIFIKASI ||

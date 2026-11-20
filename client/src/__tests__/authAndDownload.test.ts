@@ -79,7 +79,9 @@ describe('Phase 12: Google Authentication & Document Download Client Suite', () 
       expect(state.user?.avatarUrl).toBe('https://lh3.googleusercontent.com/a/mock-avatar=s96-c');
       expect(state.user?.googleId).toBe('google-sub-123456789');
       expect(state.user?.emailVerified).toBe(true);
-      expect(localStorage.getItem('ina_geo_token')).toBe('mock-app-jwt-token-777');
+      // Hardening: JWT is never stored in persistent browser storage
+      expect(localStorage.getItem('ina_geo_token')).toBeNull();
+      expect(localStorage.getItem('ina_geo_user_profile')).toContain('peneliti@google.com');
     });
 
     it('loginWithGoogle should capture error on rejected credential', async () => {
@@ -119,7 +121,9 @@ describe('Phase 12: Google Authentication & Document Download Client Suite', () 
       expect(state.token).toBe('mock-jwt-demo-token-123');
       expect(state.user?.email).toBe('demo@inageoportal.go.id');
       expect(state.user?.name).toBe('Peneliti Geospasial Demo');
-      expect(localStorage.getItem('ina_geo_token')).toBe('mock-jwt-demo-token-123');
+      // Hardening: JWT is never stored in persistent browser storage
+      expect(localStorage.getItem('ina_geo_token')).toBeNull();
+      expect(localStorage.getItem('ina_geo_user_profile')).toContain('demo@inageoportal.go.id');
     });
 
     it('login with invalid credentials should fail and set error state', async () => {
@@ -164,7 +168,9 @@ describe('Phase 12: Google Authentication & Document Download Client Suite', () 
       expect(state.token).toBe('mock-jwt-new-user-token');
       expect(state.user?.email).toBe('kartografer@geoportal.id');
       expect(state.user?.name).toBe('Kartografer Baru');
-      expect(localStorage.getItem('ina_geo_token')).toBe('mock-jwt-new-user-token');
+      // Hardening: JWT is never stored in persistent browser storage
+      expect(localStorage.getItem('ina_geo_token')).toBeNull();
+      expect(localStorage.getItem('ina_geo_user_profile')).toContain('kartografer@geoportal.id');
     });
 
     it('register should capture and surface duplicate email error', async () => {
@@ -186,7 +192,7 @@ describe('Phase 12: Google Authentication & Document Download Client Suite', () 
     });
 
     it('logout should clear all credentials, storage, and session information', () => {
-      localStorage.setItem('ina_geo_token', 'temp-token');
+      localStorage.setItem('ina_geo_user_profile', JSON.stringify({ id: 'u1', name: 'User 1' }));
       useAuthStore.setState({
         isAuthenticated: true,
         token: 'temp-token',
@@ -201,6 +207,7 @@ describe('Phase 12: Google Authentication & Document Download Client Suite', () 
       expect(state.user).toBeNull();
       expect(state.session).toBeNull();
       expect(localStorage.getItem('ina_geo_token')).toBeNull();
+      expect(localStorage.getItem('ina_geo_user_profile')).toBeNull();
     });
   });
 

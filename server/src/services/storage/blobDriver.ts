@@ -126,7 +126,7 @@ export class VercelBlobStorageDriver implements StorageDriver {
     return buffer.toString('utf-8');
   }
 
-  async createReadStream(key: string): Promise<Readable> {
+  async createReadStream(key: string, _range?: { start?: number; end?: number }): Promise<Readable> {
     // Blob returns an HTTP body; buffer it then expose a Readable so callers
     // keep the same interface as the local driver.
     const buffer = await this.read(key);

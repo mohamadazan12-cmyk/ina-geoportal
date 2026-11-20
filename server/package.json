@@ -13,10 +13,13 @@
     "db:backup": "tsx prisma/backup.ts",
     "db:restore": "tsx prisma/restoreBackup.ts",
     "storage:upload": "tsx prisma/uploadFixtures.ts",
+    "storage:migrate-r2": "tsx scripts/migrate_to_r2.ts",
     "seed:fix-providers": "tsx prisma/fixProviders.ts",
-    "test": "vitest run"
+    "test": "vitest run --no-file-parallelism"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1172.0",
+    "@aws-sdk/lib-storage": "^3.1172.0",
     "@prisma/client": "^6.4.1",
     "@upstash/ratelimit": "^2.2.1",
     "@upstash/redis": "^1.41.0",

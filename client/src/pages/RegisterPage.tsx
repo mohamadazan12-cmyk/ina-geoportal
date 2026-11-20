@@ -44,8 +44,8 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setLocalError('Kata sandi minimal 6 karakter.');
+    if (password.length < 8) {
+      setLocalError('Kata sandi minimal 8 karakter.');
       return;
     }
 
@@ -63,6 +63,8 @@ export const RegisterPage: React.FC = () => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password,
+      confirmPassword,
+      agreeTerms,
       institution: institution.trim() || 'Umum',
     });
 
@@ -72,8 +74,8 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex-1 flex items-center justify-center py-6 px-4 select-none">
-      <div className="w-full max-w-[390px] space-y-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-md">
+    <div className="w-full flex-1 flex items-center justify-center py-6 md:py-16 px-4 select-none">
+      <div className="w-full max-w-[390px] md:max-w-[500px] space-y-4 md:space-y-5 bg-white p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-md md:shadow-xl">
         {/* Header Branding */}
         <div className="text-center space-y-1.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#153096] to-[#1A3BAF] text-white flex items-center justify-center mx-auto shadow-md">

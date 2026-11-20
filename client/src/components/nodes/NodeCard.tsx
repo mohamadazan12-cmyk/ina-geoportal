@@ -25,10 +25,10 @@ export const NodeCard: React.FC<NodeCardProps> = ({ node }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 hover:border-emerald-300 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-200 group">
+    <div className="bg-white rounded-2xl border border-slate-200 hover:border-[#1A3BAF]/40 p-5 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-200 group">
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-[#1A3BAF] border border-blue-200">
             {getTypeLabel(node.type)}
           </span>
           <Badge variant={node.status}>{node.status.toUpperCase()}</Badge>
@@ -36,7 +36,7 @@ export const NodeCard: React.FC<NodeCardProps> = ({ node }) => {
 
         <h3
           onClick={() => navigate(`/simpul/${node.id}`)}
-          className="text-base font-bold text-slate-900 group-hover:text-emerald-700 cursor-pointer transition-colors mb-2 line-clamp-2"
+          className="text-base font-bold text-slate-900 group-hover:text-[#1A3BAF] cursor-pointer transition-colors mb-2 line-clamp-2"
         >
           {node.name}
         </h3>
@@ -53,7 +53,7 @@ export const NodeCard: React.FC<NodeCardProps> = ({ node }) => {
             </div>
           )}
           <div className="flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <Database className="w-3.5 h-3.5 text-[#1A3BAF] shrink-0" />
             <span className="font-semibold text-slate-700">{node.datasetCount ?? 0} Dataset Spasial</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ export const NodeCard: React.FC<NodeCardProps> = ({ node }) => {
             href={node.websiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-slate-500 hover:text-emerald-700 flex items-center gap-1 transition-colors"
+            className="text-xs text-slate-500 hover:text-[#1A3BAF] flex items-center gap-1 transition-colors"
           >
             <span>Portal Web</span>
             <ExternalLink className="w-3 h-3" />
@@ -76,7 +76,7 @@ export const NodeCard: React.FC<NodeCardProps> = ({ node }) => {
 
         <button
           onClick={() => navigate(`/simpul/${node.id}`)}
-          className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-emerald-600 text-slate-700 hover:text-white text-xs font-bold transition-all flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white"
+          className="py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-[#1A3BAF] text-slate-700 hover:text-white text-xs font-bold transition-all flex items-center gap-1 group-hover:bg-[#1A3BAF] group-hover:text-white"
         >
           <span>Detail Simpul</span>
           <ArrowRight className="w-3.5 h-3.5" />

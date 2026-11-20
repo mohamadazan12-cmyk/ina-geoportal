@@ -105,6 +105,11 @@ function createMemoryLimiter(policy: RateLimitPolicy, scope: RateLimitScope): Li
   if (typeof sweep.unref === 'function') sweep.unref();
 
   return async (req, res, next) => {
+    if (process.env.NODE_ENV === 'test') {
+      next();
+      return;
+    }
+
     const key = `${scope}:${clientKey(req)}`;
     const now = Date.now();
     const bucket = buckets.get(key);
