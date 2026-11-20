@@ -27,7 +27,9 @@ try {
   // dotenv optional
 }
 
-const PRISMA_DIR = path.resolve(__dirname, '..', 'prisma');
+const SERVER_DIR = path.resolve(__dirname, '..');
+const ROOT_DIR = path.resolve(__dirname, '..', '..');
+const PRISMA_DIR = path.resolve(SERVER_DIR, 'prisma');
 
 function resolveTarget() {
   const explicit = (process.env.PRISMA_TARGET || '').trim().toLowerCase();
@@ -37,6 +39,42 @@ function resolveTarget() {
   const url = (process.env.DATABASE_URL || '').trim();
   if (/^postgres(ql)?:\/\//i.test(url)) return 'postgres';
   return 'sqlite';
+}
+
+function findLocalPrisma() {
+  const searchPaths = [SERVER_DIR, ROOT_DIR, process.cwd()];
+
+  // 1. Resolve prisma package.json and execute its CLI entry point via Node
+  for (const basePath of searchPaths) {
+    try {
+      const pkgJsonPath = require.resolve('prisma/package.json', { paths: [basePath] });
+      const pkgDir = path.dirname(pkgJsonPath);
+      const pkg = require(pkgJsonPath);
+      const binRel = typeof pkg.bin === 'string' ? pkg.bin : (pkg.bin && pkg.bin.prisma);
+      if (binRel) {
+        const binPath = path.resolve(pkgDir, binRel);
+        if (fs.existsSync(binPath)) {
+          return { type: 'node', path: binPath, version: pkg.version || 'unknown' };
+        }
+      }
+    } catch {
+      // Continue search
+    }
+  }
+
+  // 2. Check local node_modules/.bin/prisma executable directly
+  const binDirs = [
+    path.join(SERVER_DIR, 'node_modules', '.bin'),
+    path.join(ROOT_DIR, 'node_modules', '.bin'),
+  ];
+  for (const binDir of binDirs) {
+    const binCmd = process.platform === 'win32' ? path.join(binDir, 'prisma.cmd') : path.join(binDir, 'prisma');
+    if (fs.existsSync(binCmd)) {
+      return { type: 'exec', path: binCmd, version: 'local-bin' };
+    }
+  }
+
+  return null;
 }
 
 function main() {
@@ -52,19 +90,29 @@ function main() {
 
   console.log(`[prisma-generate] Target: ${target} → prisma/${schemaFile}`);
 
+  const localPrisma = findLocalPrisma();
+  if (!localPrisma) {
+    console.error('[prisma-generate] Error: Local Prisma CLI not found in node_modules.');
+    console.error('[prisma-generate] Refusing to use "npx prisma" to prevent downloading unpinned or RC versions from npm.');
+    console.error('[prisma-generate] Please ensure "prisma" (v6.19.3) is installed in dependencies.');
+    process.exit(1);
+  }
+
+  console.log(`[prisma-generate] Using local Prisma CLI v${localPrisma.version} (${localPrisma.path})`);
+
   try {
     const relSchema = `prisma/${schemaFile}`;
-    if (process.platform === 'win32') {
+    if (localPrisma.type === 'node') {
       execFileSync(
-        'cmd.exe',
-        ['/c', 'npx', 'prisma', 'generate', `--schema=${relSchema}`],
-        { stdio: 'inherit', cwd: path.resolve(__dirname, '..') }
+        process.execPath,
+        [localPrisma.path, 'generate', `--schema=${relSchema}`],
+        { stdio: 'inherit', cwd: SERVER_DIR, env: process.env }
       );
     } else {
       execFileSync(
-        'npx',
-        ['prisma', 'generate', `--schema=${relSchema}`],
-        { stdio: 'inherit', cwd: path.resolve(__dirname, '..') }
+        localPrisma.path,
+        ['generate', `--schema=${relSchema}`],
+        { stdio: 'inherit', cwd: SERVER_DIR, env: process.env, shell: process.platform === 'win32' }
       );
     }
   } catch (error) {
