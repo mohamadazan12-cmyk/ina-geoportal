@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc && node scripts/copy-assets.js",
+    "build": "node scripts/prisma-generate.js && tsc && node scripts/copy-assets.js",
     "start": "node dist/index.js",
     "prisma:generate": "node scripts/prisma-generate.js",
     "prisma:migrate": "prisma migrate dev --name init",

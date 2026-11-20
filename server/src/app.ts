@@ -126,3 +126,4 @@ export function createApp(): express.Express {
 
 /** Default export for serverless platforms. */
 export const app = createApp();
+export default app;
