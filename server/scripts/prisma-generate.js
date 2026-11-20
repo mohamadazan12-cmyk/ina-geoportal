@@ -42,35 +42,72 @@ function resolveTarget() {
 }
 
 function findLocalPrisma() {
-  const searchPaths = [SERVER_DIR, ROOT_DIR, process.cwd()];
+  // Collect candidate base directories: service server dir, monorepo root, cwd, script dir
+  const candidateBases = [
+    SERVER_DIR,
+    ROOT_DIR,
+    process.cwd(),
+    __dirname,
+  ];
 
-  // 1. Resolve prisma package.json and execute its CLI entry point via Node
-  for (const basePath of searchPaths) {
-    try {
-      const pkgJsonPath = require.resolve('prisma/package.json', { paths: [basePath] });
-      const pkgDir = path.dirname(pkgJsonPath);
-      const pkg = require(pkgJsonPath);
-      const binRel = typeof pkg.bin === 'string' ? pkg.bin : (pkg.bin && pkg.bin.prisma);
-      if (binRel) {
-        const binPath = path.resolve(pkgDir, binRel);
-        if (fs.existsSync(binPath)) {
-          return { type: 'node', path: binPath, version: pkg.version || 'unknown' };
+  // Walk up ancestor directories from SERVER_DIR
+  let curr = SERVER_DIR;
+  while (curr) {
+    if (!candidateBases.includes(curr)) {
+      candidateBases.push(curr);
+    }
+    const parent = path.dirname(curr);
+    if (parent === curr) break;
+    curr = parent;
+  }
+
+  // 1. Check direct file path for prisma/build/index.js in node_modules of all candidates
+  for (const base of candidateBases) {
+    const directJs = path.join(base, 'node_modules', 'prisma', 'build', 'index.js');
+    if (fs.existsSync(directJs)) {
+      const pkgPath = path.join(base, 'node_modules', 'prisma', 'package.json');
+      let version = '6.19.3';
+      try {
+        if (fs.existsSync(pkgPath)) {
+          version = JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version || version;
         }
-      }
-    } catch {
-      // Continue search
+      } catch {}
+      return { type: 'node', path: directJs, version };
     }
   }
 
-  // 2. Check local node_modules/.bin/prisma executable directly
-  const binDirs = [
-    path.join(SERVER_DIR, 'node_modules', '.bin'),
-    path.join(ROOT_DIR, 'node_modules', '.bin'),
-  ];
-  for (const binDir of binDirs) {
-    const binCmd = process.platform === 'win32' ? path.join(binDir, 'prisma.cmd') : path.join(binDir, 'prisma');
-    if (fs.existsSync(binCmd)) {
-      return { type: 'exec', path: binCmd, version: 'local-bin' };
+  // 2. Resolve via require.resolve from candidate bases
+  for (const base of candidateBases) {
+    try {
+      const pkgJsonPath = require.resolve('prisma/package.json', { paths: [base] });
+      const pkgDir = path.dirname(pkgJsonPath);
+      const directJs = path.join(pkgDir, 'build', 'index.js');
+      if (fs.existsSync(directJs)) {
+        let version = '6.19.3';
+        try {
+          const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+          version = pkg.version || version;
+        } catch {}
+        return { type: 'node', path: directJs, version };
+      }
+    } catch {}
+  }
+
+  // 3. Check local node_modules/.bin/prisma executable directly
+  for (const base of candidateBases) {
+    const binDir = path.join(base, 'node_modules', '.bin');
+    const binCandidates = process.platform === 'win32'
+      ? [
+          path.join(binDir, 'prisma.cmd'),
+          path.join(binDir, 'prisma.exe'),
+          path.join(binDir, 'prisma')
+        ]
+      : [path.join(binDir, 'prisma')];
+
+    for (const binPath of binCandidates) {
+      if (fs.existsSync(binPath)) {
+        return { type: 'exec', path: binPath, version: 'local-bin' };
+      }
     }
   }
 
