@@ -1,6 +1,5 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { FigmaTopBar } from '../figma/FigmaTopBar';
 import { FigmaHeader } from '../figma/FigmaHeader';
 import { FigmaBottomNav } from '../figma/FigmaBottomNav';
 import { DesktopNavbar } from './DesktopNavbar';
@@ -15,7 +14,6 @@ export const AppLayout: React.FC = () => {
     <div className="min-h-screen bg-[#F1F7FA] flex flex-col antialiased">
       {/* Mobile Top Navigation (only < md / < 768px) */}
       <div className="md:hidden w-full max-w-[430px] mx-auto bg-white border-x border-slate-200 shadow-xs">
-        <FigmaTopBar />
         <FigmaHeader />
       </div>
 
