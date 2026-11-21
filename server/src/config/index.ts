@@ -112,16 +112,26 @@ export function inspectJwtSecret(): {
 
 const isProduction = (): boolean => process.env.NODE_ENV === 'production';
 
+export const DEFAULT_PRODUCTION_ORIGIN = 'https://ina-geoportal.vercel.app';
+
 /**
  * Comma-separated allow-list of frontend origins permitted to call the API.
- * In the recommended same-origin Vercel architecture this list stays empty and
- * CORS is simply not enabled, because the SPA and the API share a host.
+ * In production, strictly enforces exact origin allowlist (including
+ * https://ina-geoportal.vercel.app) without wildcard domain allowance.
  */
 export function resolveAllowedOrigins(): string[] {
-  return (process.env.CORS_ORIGIN || '')
+  const origins = (process.env.CORS_ORIGIN || '')
     .split(',')
-    .map((value) => value.trim())
+    .map((value) => value.trim().replace(/\/+$/, ''))
     .filter((value) => value.length > 0 && value !== '*');
+
+  if (isProduction()) {
+    if (!origins.includes(DEFAULT_PRODUCTION_ORIGIN)) {
+      origins.push(DEFAULT_PRODUCTION_ORIGIN);
+    }
+  }
+
+  return origins;
 }
 
 export const config = {

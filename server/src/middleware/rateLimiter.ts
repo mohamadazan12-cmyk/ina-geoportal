@@ -203,10 +203,16 @@ function createUpstashLimiter(
 /**
  * Choose the limiter backend once, at module initialisation time.
  *
- * Production refuses to run with a process-local limiter unless the operator
- * explicitly opts in via RATE_LIMIT_ALLOW_MEMORY=true — a per-instance counter
- * cannot enforce a shared budget across serverless invocations, so silently
- * using one would give a false sense of protection.
+ * ARSITEKTUR RATE LIMITING:
+ * 1. Distributed Protection (Upstash Redis REST):
+ *    Menyediakan kuota rate limiting bersama lintas seluruh instance serverless Vercel.
+ *    Diaktifkan saat UPSTASH_REDIS_REST_URL dan UPSTASH_REDIS_REST_TOKEN terkonfigurasi.
+ * 2. Fallback In-Memory (Per-Instance):
+ *    Menjaga ketersediaan aplikasi agar tidak crash saat Upstash belum tersedia, atau saat
+ *    RATE_LIMIT_ALLOW_MEMORY=true.
+ *    CATATAN PENTING: Rate limiter in-memory ini bersifat per-instance (process-local) dan
+ *    bukan distributed protection; kuota dihitung per container serverless dan ter-reset
+ *    saat instance baru dibuat/dimatikan.
  */
 export const RATE_LIMITER_BACKEND: RateLimiterBackend = (() => {
   const allowMemory = (process.env.RATE_LIMIT_ALLOW_MEMORY || '').toLowerCase() === 'true';
@@ -220,30 +226,20 @@ export const RATE_LIMITER_BACKEND: RateLimiterBackend = (() => {
     return 'upstash';
   }
 
-  if (config.isProduction && !allowMemory) {
-    diagnostics = {
-      backend: 'memory',
-      shared: false,
-      productionSafe: false,
-      warning:
-        'UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN belum diset pada production. ' +
-        'Rate limit proses-lokal tidak dapat menegakkan kuota lintas instance serverless.',
-    };
-    throw new ConfigError(
-      'RATE_LIMIT_BACKEND_MISSING',
-      'Rate limiting production memerlukan Upstash Redis. Set UPSTASH_REDIS_REST_URL dan ' +
-        'UPSTASH_REDIS_REST_TOKEN. Untuk menonaktifkan pemeriksaan ini secara eksplisit ' +
-        '(tidak disarankan), set RATE_LIMIT_ALLOW_MEMORY=true.'
-    );
+  // Fallback in-memory jika Upstash belum terkonfigurasi
+  const warningMsg =
+    'DOKUMENTASI ARSITEKTUR: Menggunakan fallback in-memory rate limiter per-instance (non-distributed). ' +
+    'Proteksi kuota bersama lintas instance serverless membutuhkan konfigurasi UPSTASH_REDIS_REST_URL dan UPSTASH_REDIS_REST_TOKEN.';
+
+  if (config.isProduction) {
+    console.warn(`[rate-limit] ${warningMsg}`);
   }
 
   diagnostics = {
     backend: 'memory',
     shared: false,
     productionSafe: false,
-    warning: allowMemory
-      ? 'Menggunakan rate limiter in-memory karena RATE_LIMIT_ALLOW_MEMORY=true. Tidak dibagi antar instance.'
-      : 'Mode pengembangan: rate limiter in-memory proses-lokal.',
+    warning: warningMsg,
   };
   return 'memory';
 })();

@@ -41,19 +41,14 @@ function isAllowedOrigin(originStr: string, hostHeader?: string): boolean {
       return true;
     }
 
-    // Localhost development
-    if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+    // Localhost in development only
+    if (!config.isProduction && (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1')) {
       return true;
     }
 
-    // Configured CORS allowlist
+    // Configured exact CORS allowlist (always includes https://ina-geoportal.vercel.app in production)
     const allowed = config.allowedOrigins;
     if (allowed.some((a) => a === originStr || a === `${parsed.protocol}//${parsed.host}`)) {
-      return true;
-    }
-
-    // Vercel deployment preview / production domains
-    if (originHost.endsWith('.vercel.app')) {
       return true;
     }
 

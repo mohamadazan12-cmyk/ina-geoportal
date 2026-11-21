@@ -23,9 +23,9 @@ export async function getDatasets(req: Request, res: Response): Promise<void> {
 
     if (q) {
       where.OR = [
-        { title: { contains: q } },
-        { abstract: { contains: q } },
-        { description: { contains: q } },
+        { title: { contains: q, mode: 'insensitive' } },
+        { abstract: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
       ];
     }
 
@@ -38,7 +38,7 @@ export async function getDatasets(req: Request, res: Response): Promise<void> {
     }
 
     if (format) {
-      where.formatList = { contains: format.toLowerCase() };
+      where.formatList = { contains: format.toLowerCase(), mode: 'insensitive' };
     }
 
     if (year) {

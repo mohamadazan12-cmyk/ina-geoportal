@@ -14,9 +14,9 @@ export async function getNodes(req: Request, res: Response): Promise<void> {
 
     if (q) {
       where.OR = [
-        { name: { contains: q } },
-        { description: { contains: q } },
-        { province: { contains: q } },
+        { name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { province: { contains: q, mode: 'insensitive' } },
       ];
     }
 

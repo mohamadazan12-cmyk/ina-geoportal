@@ -46,7 +46,18 @@ export function createApp(): express.Express {
   if (config.hasExplicitCorsOrigin) {
     app.use(
       cors({
-        origin: config.allowedOrigins,
+        origin: (requestOrigin, callback) => {
+          if (!requestOrigin) return callback(null, true);
+          const allowed = config.allowedOrigins;
+          const isAllowed =
+            allowed.includes(requestOrigin) ||
+            (!config.isProduction && (requestOrigin.includes('localhost') || requestOrigin.includes('127.0.0.1')));
+          if (isAllowed) {
+            callback(null, true);
+          } else {
+            callback(new Error(`Origin ${requestOrigin} not allowed by CORS`));
+          }
+        },
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
@@ -77,7 +88,7 @@ export function createApp(): express.Express {
   // -------------------------------------------------------------------------
   // Global rate limiting (shared Upstash or production-safe in-memory)
   // -------------------------------------------------------------------------
-  app.use('/api', globalRateLimiter);
+  app.use(['/api', '/v1'], globalRateLimiter);
 
   // -------------------------------------------------------------------------
   // Health check (un-throttled, public)
@@ -91,6 +102,7 @@ export function createApp(): express.Express {
     res.json({
       status: 'OK',
       app: 'Ina-Geoportal Web App Redesign v2.0 Backend',
+      endpoint: '/api/health',
       timestamp: new Date().toISOString(),
       environment: config.isProduction ? 'production' : 'development',
       rateLimiter: {
@@ -112,9 +124,11 @@ export function createApp(): express.Express {
   app.get('/api/health', healthHandler);
 
   // -------------------------------------------------------------------------
-  // API v1 Mount
+  // API v1 Mount — mounted on both `/api/v1` and `/v1` so routes remain
+  // reachable whether the edge proxy forwards the original or stripped path.
   // -------------------------------------------------------------------------
   app.use('/api/v1', apiRouter);
+  app.use('/v1', apiRouter);
 
   // -------------------------------------------------------------------------
   // Central error handler (must be last)

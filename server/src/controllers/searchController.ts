@@ -24,9 +24,9 @@ export async function getSearchSuggestions(req: Request, res: Response): Promise
     const datasets = await prisma.dataset.findMany({
       where: {
         OR: [
-          { title: { contains: q } },
-          { abstract: { contains: q } },
-          { description: { contains: q } },
+          { title: { contains: q, mode: 'insensitive' } },
+          { abstract: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
         ],
       },
       include: {
@@ -48,7 +48,7 @@ export async function getSearchSuggestions(req: Request, res: Response): Promise
     // 2. Search Categories
     const categories = await prisma.category.findMany({
       where: {
-        name: { contains: q },
+        name: { contains: q, mode: 'insensitive' },
       },
       take: 3,
     });
@@ -67,8 +67,8 @@ export async function getSearchSuggestions(req: Request, res: Response): Promise
     const nodes = await prisma.networkNode.findMany({
       where: {
         OR: [
-          { name: { contains: q } },
-          { description: { contains: q } },
+          { name: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
         ],
       },
       take: 3,

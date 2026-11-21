@@ -106,7 +106,7 @@ export async function getDownloadHistory(req: AuthenticatedRequest, res: Respons
     if (search) {
       where.dataset = {
         ...where.dataset,
-        title: { contains: String(search).trim() },
+        title: { contains: String(search).trim(), mode: 'insensitive' },
       };
     }
 
