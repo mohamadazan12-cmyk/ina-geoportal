@@ -46,9 +46,14 @@ function isAllowedOrigin(originStr: string, hostHeader?: string): boolean {
       return true;
     }
 
-    // Configured exact CORS allowlist (always includes https://ina-geoportal.vercel.app in production)
+    // Configured exact CORS allowlist (including Vercel deployment URLs and production domain)
+    const normalized = `${parsed.protocol}//${parsed.host}`;
     const allowed = config.allowedOrigins;
-    if (allowed.some((a) => a === originStr || a === `${parsed.protocol}//${parsed.host}`)) {
+    if (
+      allowed.some(
+        (a) => a === originStr || a === normalized || a.replace(/\/+$/, '') === normalized
+      )
+    ) {
       return true;
     }
 

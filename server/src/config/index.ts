@@ -115,20 +115,62 @@ const isProduction = (): boolean => process.env.NODE_ENV === 'production';
 export const DEFAULT_PRODUCTION_ORIGIN = 'https://ina-geoportal.vercel.app';
 
 /**
+ * Format a hostname or URL into a standardized HTTPS origin URL (https://<host>).
+ * Strips trailing slashes and ensures protocol if missing.
+ */
+export function formatOrigin(value: string): string {
+  const trimmed = value.trim().replace(/\/+$/, '');
+  if (!trimmed || trimmed === '*') return '';
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
+/**
  * Comma-separated allow-list of frontend origins permitted to call the API.
  * In production, strictly enforces exact origin allowlist (including
- * https://ina-geoportal.vercel.app) without wildcard domain allowance.
+ * https://ina-geoportal.vercel.app and Vercel environment deployment URLs)
+ * without wildcard domain allowance.
  */
 export function resolveAllowedOrigins(): string[] {
-  const origins = (process.env.CORS_ORIGIN || '')
-    .split(',')
-    .map((value) => value.trim().replace(/\/+$/, ''))
-    .filter((value) => value.length > 0 && value !== '*');
+  const origins: string[] = [];
 
-  if (isProduction()) {
-    if (!origins.includes(DEFAULT_PRODUCTION_ORIGIN)) {
-      origins.push(DEFAULT_PRODUCTION_ORIGIN);
+  const addOrigin = (raw: string | undefined) => {
+    if (!raw) return;
+    const formatted = formatOrigin(raw);
+    if (formatted && !origins.includes(formatted)) {
+      origins.push(formatted);
     }
+  };
+
+  // 1. Explicit CORS_ORIGIN values (comma-separated)
+  const configured = (process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0 && s !== '*');
+  for (const origin of configured) {
+    addOrigin(origin);
+  }
+
+  // 2. Vercel deployment URL (VERCEL_URL) - exact origin of current deployment
+  if (process.env.VERCEL_URL) {
+    addOrigin(process.env.VERCEL_URL);
+  }
+
+  // 3. Vercel production URL (VERCEL_PROJECT_PRODUCTION_URL)
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    addOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  }
+
+  // 4. Vercel branch URL (VERCEL_BRANCH_URL) if available
+  if (process.env.VERCEL_BRANCH_URL) {
+    addOrigin(process.env.VERCEL_BRANCH_URL);
+  }
+
+  // 5. Default production origin (always included in production)
+  if (isProduction()) {
+    addOrigin(DEFAULT_PRODUCTION_ORIGIN);
   }
 
   return origins;

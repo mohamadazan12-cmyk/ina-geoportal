@@ -48,8 +48,10 @@ export function createApp(): express.Express {
       cors({
         origin: (requestOrigin, callback) => {
           if (!requestOrigin) return callback(null, true);
+          const normalized = requestOrigin.trim().replace(/\/+$/, '');
           const allowed = config.allowedOrigins;
           const isAllowed =
+            allowed.includes(normalized) ||
             allowed.includes(requestOrigin) ||
             (!config.isProduction && (requestOrigin.includes('localhost') || requestOrigin.includes('127.0.0.1')));
           if (isAllowed) {
