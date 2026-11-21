@@ -37,3 +37,7 @@ playwright-report/
 docs/visual-validation/
 PHASE_*.md
 *.log
+
+# 4. Legacy Root Serverless Function (Superseded by Vercel Multi-Service 'server')
+api/
+tsconfig.api.json
